@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Wallet</title>
+</head>
+<body STYLE="font-size: 24pt;">
+<h1>Bitcoin Paper Wallet</h1>
+
+<img src="{{ install_dir }}/bitcoin-blue-ribbon-gift.jpg" align="right">
+
+<h2>{{ wallet_name }}</h2>
+
+<p>This Paper Wallet contains a private bitcoin key which gives access to your bitcoins.</p>
+
+<p>WARNING: Do not reveal this private key until you are ready to import it in your wallet.
+    Anything or anyone who scans this key can steal your bitcoins!</p>
+
+<h3>Check Balance</h3>
+
+<p>To check the available balance you can safely scan the public address below and enter it
+on a website such as https://blockchain.info</p>
+
+<div>Public Address: {{ address }}</div>
+<img src="{{ filename_pre }}address.png">
+
+<h3>What do I need to do with this paper?</h3>
+
+This paper represents actual value in Bitcoins. You have a couple of options:
+<ol>
+    <li>Just keep this paper in a safe place. Make a copy of this paper and store in another safe place.
+        And wait till Bitcoins are worth triljons each (or 0 no one knows...)</li>
+    <li>Exchange them for valuable and well known Euro's. Follow the instructions to create a wallet below
+    and use a site such as https://bitonic.nl to get the value of your bitcoins wired to you on an IBAN bank account.</li>
+    <li>Spend them on pizza (https://thuisbezorgd.nl), vaporizers (https://vaposhop.com/), chocolate and more
+    (https://www.eco-logisch.nl/) or of course the well-known Azarius (https://azarius.net)</li>
+    <li>Or any combination of the above. But remember if you take the bitcoins of this paper wallet
+        transfer them all in once for safety reasons
+    </li>
+</ol>
+
+<h3>Create a wallet</h3>
+
+<p>Install a bitcoin wallet on your phone or PC such as Mycelium (or Electrum or any other wallet).
+When you create a new wallet remember to create a backup, preferably write down your keys and password
+    on a piece of paper. If you loose your phone you can restore your bitcoins with these keys, but if
+you loose your keys your bitcoins are lost.
+If you choose to install Mycelium, you can easily transfer the Bitcoins from this paper if you go to the
+main menu and select 'Cold Storage', then select 'QR code' to scan the Private Key on this paper.</p>
+
+<hr />
+
+<img src="{{ filename_pre }}privatekey.png">
+<div>Private Key: {{ private_key }}</div>
+
+</body>
+</html>
