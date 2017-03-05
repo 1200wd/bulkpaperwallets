@@ -138,16 +138,16 @@ if __name__ == '__main__':
                     "\nPlease retype exact name of wallet to proceed: " % args.wallet_remove)
         if inp == args.wallet_remove:
             print(delete_wallet(args.wallet_remove))
-
-    print("\nCreate or open wallet '%s' (%s network)" % (wallet_name, network))
-    print("Output amounts %s" % args.outputs)
+            sys.exit()
 
     if wallet_exists(wallet_name):
         wallet = BulkPaperWallet(wallet_name)
+        print("\nOpen wallet '%s' (%s network)" % (wallet_name, network))
     else:
+        print("\nCREATE wallet '%s' (%s network)" % (wallet_name, network))
         if not args.recover_wallet_passphrase:
             words = Mnemonic('english').generate()
-            print("Your mnemonic private key sentence is: %s" % words)
+            print("\nYour mnemonic private key sentence is: %s" % words)
             print("\nPlease write down on paper and backup. IF YOU LOSE THIS PRIVATE KEY ALL COINS ARE LOST!")
             inp = input("\nType 'yes' if you understood and wrote down your key: ")
             if inp not in ['yes', 'Yes', 'YES']:
@@ -159,5 +159,28 @@ if __name__ == '__main__':
         seed = binascii.hexlify(Mnemonic().to_seed(words))
         hdkey = HDKey().from_seed(seed, network=network)
         wallet = BulkPaperWallet.create(name=wallet_name, network=network, key=hdkey.extended_wif())
+        wallet.new_account()
 
-    wallet.info(detail=3)
+    if args.outputs_import:
+        pass
+        # TODO: import amount and wallet names from csv
+    else:
+        outputs = [{'amount': o} for o in args.outputs]
+
+    t = Transaction(network=network)
+    output_keys = []
+    total_amount = 0
+    for o in outputs:
+        nk = wallet.new_key()
+        t.add_output(o['amount'], nk.address)
+        output_keys.append(nk)
+        total_amount += o['amount']
+
+    estimated_fee = (200 + len(t.raw())) * 200
+    print("Estimated fee is for this transaction is %d" % estimated_fee)
+    if not args.input_key:
+        # TODO: create new key and ask for funds
+        pass
+
+    # TODO write code to look for UTXO's
+
