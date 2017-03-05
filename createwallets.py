@@ -1,8 +1,12 @@
 #
-# Bulk Paper Wallet
+# Bulk Paper Wallets
 # (c) March 2017 1200 Development Amsterdam
 #
 # Generate Bitcoin Paper Wallets in Bulk and fund them. Wallets will be saved as PDF files.
+#
+# Published under GNU GENERAL PUBLIC LICENSE see LICENSE file for more details.
+# WARNING: This software is still under development, only use if you understand the code and known what you are doing.
+# So use at your own risk!
 #
 
 import sys
@@ -13,7 +17,7 @@ import binascii
 import qrcode
 import pdfkit
 from jinja2 import Template
-from bitcoinlib.wallets import HDWallet, wallet_exists
+from bitcoinlib.wallets import HDWallet, wallet_exists, delete_wallet, list_wallets
 from bitcoinlib.keys import Key, HDKey
 from bitcoinlib.transactions import Transaction, Input, Output
 from bitcoinlib.mnemonic import Mnemonic
@@ -84,12 +88,12 @@ class BulkPaperWallet(HDWallet):
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Create Bulk Paper Wallets')
-    parser.add_argument('--wallet_name', '-w', default=DEFAULT_WALLET_NAME,
+    parser.add_argument('--wallet-name', '-w', default=DEFAULT_WALLET_NAME,
                         help="Name of wallet to create or open. Used to store your all your wallet keys "
                              "and will be printed on each paper wallet")
     parser.add_argument('--network', '-n', help="Specify 'bitcoin', 'testnet' or other supported network",
                         default=DEFAULT_NETWORK)
-    group1 = parser.add_mutually_exclusive_group(required=True)
+    group1 = parser.add_mutually_exclusive_group()
     group1.add_argument('--outputs', '-o', nargs="*", type=float,
                         help="List of output values. For example '-o 1 2 3' creates 3 wallets with a value of "
                              "1, 2 and 3 bitcoin successively")
@@ -100,11 +104,12 @@ def parse_args():
                         help="Repeat the outputs OUTPUTS_REPEAT times. For example 'createwallet.py -o 5 -r 10' "
                              "will create 10 wallets with 5 bitcoin")
     parser.add_argument('--input-key', '-i',
-                        help="Private key of wallet to create transaction input. If not specified a private key "
-                             "and address to send bitcoins to will be created. The program must wait before the"
-                             "transfer arives before it can continue")
-    parser.add_argument('--wallet_remove',
+                        help="Private key to create transaction input. If not specified a private key "
+                             "and address to send bitcoins to will be created")
+    parser.add_argument('--wallet-remove',
                         help="Name of wallet to remove, all keys and related information will be deleted")
+    parser.add_argument('--list-wallets', '-l', action='store_true',
+                        help="List all known wallets in bitcoinlib database")
     parser.add_argument('--recover-wallet-passphrase',
                         help="Passphrase of 12 words to recover and regenerate a previous wallet")
 
@@ -120,24 +125,36 @@ if __name__ == '__main__':
     wallet_name = args.wallet_name
     network = args.network
 
-    print("Create or open wallet '%s' (%s network)" % (wallet_name, network))
+    if args.list_wallets:
+        print("\nBitcoinlib wallets:")
+        for w in list_wallets():
+            print(w['name'])
 
+    if args.wallet_remove:
+        if not wallet_exists(args.wallet_remove):
+            print("Wallet '%s' not found" % args.wallet_remove)
+            sys.exit()
+        inp = input("\nWallet '%s' with all keys and will be removed, without private key it cannot be restored."
+                    "\nPlease retype exact name of wallet to proceed: " % args.wallet_remove)
+        if inp == args.wallet_remove:
+            print(delete_wallet(args.wallet_remove))
+
+    print("\nCreate or open wallet '%s' (%s network)" % (wallet_name, network))
     print("Output amounts %s" % args.outputs)
 
-    sys.exit()
     if wallet_exists(wallet_name):
         wallet = BulkPaperWallet(wallet_name)
     else:
-        if not PK_SENTENCE:
+        if not args.recover_wallet_passphrase:
             words = Mnemonic('english').generate()
             print("Your mnemonic private key sentence is: %s" % words)
             print("\nPlease write down on paper and backup. IF YOU LOSE THIS PRIVATE KEY ALL COINS ARE LOST!")
-            inp = input("Type 'yes' if you understood and wrote down your key: ")
+            inp = input("\nType 'yes' if you understood and wrote down your key: ")
             if inp not in ['yes', 'Yes', 'YES']:
                 print("Exiting...")
                 sys.exit()
         else:
-            words = PK_SENTENCE
+            words = args.recover_wallet_passphrase
 
         seed = binascii.hexlify(Mnemonic().to_seed(words))
         hdkey = HDKey().from_seed(seed, network=network)
