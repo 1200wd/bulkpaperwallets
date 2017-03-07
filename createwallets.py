@@ -12,7 +12,6 @@
 import sys
 import os
 import argparse
-from builtins import input
 import binascii
 import qrcode
 import pdfkit
@@ -22,26 +21,18 @@ from bitcoinlib.keys import HDKey
 from bitcoinlib.mnemonic import Mnemonic
 from bitcoinlib.config import networks
 from bitcoinlib.services.services import Service
+try:
+   input = raw_input
+except NameError:
+   pass
 
 
-# Bitcoins uitdelen definitions
 DEFAULT_NETWORK = 'bitcoin'
 DEFAULT_WALLET_NAME = "Bulk Paper Wallet"
-# OUTPUT_NUMBER = 5
-# OUTPUT_FEE = 10000
-# OUTPUT_AMOUNT = int((135914715 / 5) - OUTPUT_FEE)
-# PK_SENTENCE = 'dizzy shoe popular funny purse street drink jazz call key local movie'
-
 INSTALL_DIR = os.path.dirname(__file__)
 WALLET_DIR = os.path.join(INSTALL_DIR, 'wallets')
 if not os.path.exists(WALLET_DIR):
     os.makedirs(WALLET_DIR)
-
-# Unspent transaction output to use as input
-# TODO: Allow more then 1 input
-# input_utxo = 'adee8bdd011f60e52949b65b069ff9f19fc220815fdc1a6034613ed1f6b775f1'
-# input_index = 0
-# input_pk = 'cRMjy1LLMPsVU4uaAt3br8Ft5vdJLx6prY4Sx7WjPARrpYAnVEkV'
 
 
 class BulkPaperWallet(HDWallet):
@@ -65,7 +56,7 @@ class BulkPaperWallet(HDWallet):
     #     return
 
     def create_paper_wallets(self, output_keys):
-        # Create Paper wallets
+        count = 0
         for wallet_key in output_keys:
             address_img = qrcode.make(wallet_key.address)
             filename_pre = "%s/%d-" % (WALLET_DIR, wallet_key.key_id)
@@ -85,6 +76,8 @@ class BulkPaperWallet(HDWallet):
                 address=wallet_key.address)
             print("Generate wallet %d" % wallet_key.key_id)
             pdfkit.from_string(wallet_str, filename_pre+'wallet.pdf')
+            count += 1
+        print("A total of %d paper wallets has been created" % count)
 
 
 def parse_args():
@@ -116,8 +109,10 @@ def parse_args():
 
     pa = parser.parse_args()
     if pa.outputs_repeat and pa.outputs is None:
-        parser = argparse.ArgumentParser()
         parser.error("--output_repeat requires --outputs")
+    if not pa.wallet_remove and not (pa.outputs or pa.outputs_import):
+        parser.error("Either --outputs or --outputs-import should be specified")
+
     return pa
 
 if __name__ == '__main__':
@@ -130,6 +125,7 @@ if __name__ == '__main__':
         print("\nBitcoinlib wallets:")
         for w in list_wallets():
             print(w['name'])
+        print("\n")
 
     if args.wallet_remove:
         if not wallet_exists(args.wallet_remove):
@@ -141,7 +137,6 @@ if __name__ == '__main__':
             print(delete_wallet(args.wallet_remove))
             sys.exit()
 
-    # delete_wallet(wallet_name)
     if wallet_exists(wallet_name):
         wallet = BulkPaperWallet(wallet_name)
         print("\nOpen wallet '%s' (%s network)" % (wallet_name, network))
@@ -182,7 +177,7 @@ if __name__ == '__main__':
         outputs_arr.append((nk.address, amount))
         total_amount += amount
 
-    estimated_fee = (200 + len(outputs_arr*25)) * 200
+    estimated_fee = (200 + len(outputs_arr*50)) * 200
     print("Estimated fee is for this transaction is %s" % networks.print_value(estimated_fee, network))
     print("Total value of outputs is %s" % networks.print_value(total_amount, network))
     total_transaction = total_amount + estimated_fee
