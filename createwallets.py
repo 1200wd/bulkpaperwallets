@@ -18,9 +18,9 @@ import qrcode
 import pdfkit
 from jinja2 import Template
 from bitcoinlib.wallets import HDWallet, wallet_exists, delete_wallet, list_wallets
-from bitcoinlib.keys import Key, HDKey
-from bitcoinlib.transactions import Transaction, Input, Output
+from bitcoinlib.keys import HDKey
 from bitcoinlib.mnemonic import Mnemonic
+from bitcoinlib.config import networks
 from bitcoinlib.services.services import Service
 
 
@@ -46,23 +46,23 @@ if not os.path.exists(WALLET_DIR):
 
 class BulkPaperWallet(HDWallet):
 
-    def create_bulk_transaction(self, wallet):
-        # Create Transaction and add input and outputs
-        t = Transaction(network=self.network)
-        ki = Key(input_pk)
-        t.add_input(input_utxo, input_index, public_key=ki.public())
-
-        output_keys = []
-        for _ in range(0, OUTPUT_NUMBER):
-            nk = wallet.new_key()
-            t.add_output(OUTPUT_AMOUNT, address=nk.address)
-            output_keys.append(nk)
-
-        t.sign(ki.private_byte(), 0)
-        if not t.verify():
-            raise Exception("Could not verify this transaction: %s" % t.get())
-
-        return
+    # def create_bulk_transaction(self, wallet):
+    #     # Create Transaction and add input and outputs
+    #     t = Transaction(network=self.network)
+    #     ki = Key(input_pk)
+    #     t.add_input(input_utxo, input_index, public_key=ki.public())
+    #
+    #     output_keys = []
+    #     for _ in range(0, OUTPUT_NUMBER):
+    #         nk = wallet.new_key()
+    #         t.add_output(OUTPUT_AMOUNT, address=nk.address)
+    #         output_keys.append(nk)
+    #
+    #     t.sign(ki.private_byte(), 0)
+    #     if not t.verify():
+    #         raise Exception("Could not verify this transaction: %s" % t.get())
+    #
+    #     return
 
     def create_paper_wallets(self, output_keys):
         # Create Paper wallets
@@ -76,13 +76,14 @@ class BulkPaperWallet(HDWallet):
 
             f = open('wallet_template.html', 'r')
             template = Template(f.read())
-            wallet_name = "%s %d" % (self.wallet_name, wallet_key.key_id)
+            wallet_name = "%s %d" % (self.name, wallet_key.key_id)
             wallet_str = template.render(
                 install_dir=INSTALL_DIR,
                 filename_pre=filename_pre,
                 wallet_name=wallet_name,
                 private_key=wallet_key.k.private().wif(),
                 address=wallet_key.address)
+            print("Generate wallet %d" % wallet_key.key_id)
             pdfkit.from_string(wallet_str, filename_pre+'wallet.pdf')
 
 
@@ -103,9 +104,9 @@ def parse_args():
     parser.add_argument('--outputs-repeat', '-r', type=int,
                         help="Repeat the outputs OUTPUTS_REPEAT times. For example 'createwallet.py -o 5 -r 10' "
                              "will create 10 wallets with 5 bitcoin")
-    parser.add_argument('--input-key', '-i',
-                        help="Private key to create transaction input. If not specified a private key "
-                             "and address to send bitcoins to will be created")
+    # parser.add_argument('--input-key', '-i',
+    #                     help="Private key to create transaction input. If not specified a private key "
+    #                          "and address to send bitcoins to will be created")
     parser.add_argument('--wallet-remove',
                         help="Name of wallet to remove, all keys and related information will be deleted")
     parser.add_argument('--list-wallets', '-l', action='store_true',
@@ -140,6 +141,7 @@ if __name__ == '__main__':
             print(delete_wallet(args.wallet_remove))
             sys.exit()
 
+    # delete_wallet(wallet_name)
     if wallet_exists(wallet_name):
         wallet = BulkPaperWallet(wallet_name)
         print("\nOpen wallet '%s' (%s network)" % (wallet_name, network))
@@ -159,28 +161,47 @@ if __name__ == '__main__':
         seed = binascii.hexlify(Mnemonic().to_seed(words))
         hdkey = HDKey().from_seed(seed, network=network)
         wallet = BulkPaperWallet.create(name=wallet_name, network=network, key=hdkey.extended_wif())
-        wallet.new_account()
+        wallet.new_account("Inputs", 0)
+        wallet.new_key("Input", 0)
+        wallet.new_account("Outputs", 1)
 
     if args.outputs_import:
         pass
         # TODO: import amount and wallet names from csv
     else:
-        outputs = [{'amount': o} for o in args.outputs]
+        outputs = [{'amount': o, 'name': ''} for o in args.outputs]
 
-    t = Transaction(network=network)
+    outputs_arr = []
     output_keys = []
     total_amount = 0
+    denominator = float(networks.NETWORKS[network]['denominator'])
     for o in outputs:
         nk = wallet.new_key()
-        t.add_output(o['amount'], nk.address)
         output_keys.append(nk)
-        total_amount += o['amount']
+        amount = int(o['amount'] * (1/denominator))
+        outputs_arr.append((nk.address, amount))
+        total_amount += amount
 
-    estimated_fee = (200 + len(t.raw())) * 200
-    print("Estimated fee is for this transaction is %d" % estimated_fee)
-    if not args.input_key:
-        # TODO: create new key and ask for funds
-        pass
+    estimated_fee = (200 + len(outputs_arr*25)) * 200
+    print("Estimated fee is for this transaction is %s" % networks.print_value(estimated_fee, network))
+    print("Total value of outputs is %s" % networks.print_value(total_amount, network))
+    total_transaction = total_amount + estimated_fee
+    # if args.input_key:
+    #     TODO write code to look for UTXO's
 
-    # TODO write code to look for UTXO's
-
+    input_key = wallet.keys(name="Input")[0]
+    wallet.updateutxos(0, input_key.id)
+    input_key = wallet.keys(name="Input")[0]
+    if input_key.balance < total_transaction:
+        file_inputcode = os.path.join(WALLET_DIR, str(wallet.wallet_id) + '-input-address-qrcode.png')
+        paymentlink = 'bitcoin:%s?amount=%.8f' % (input_key.address, total_transaction*denominator)
+        ki_img = qrcode.make(paymentlink)
+        ki_img.save(file_inputcode, 'PNG')
+        print("\nNot enough funds in wallet to create transaction.\nPlease transfer %s to "
+              "address %s and restart this program.\nYou can find a QR code in %s" %
+              (networks.print_value(total_transaction - input_key.balance, network), input_key.address, file_inputcode))
+    else:
+        print("\nEnough input(s) to spent found, create wallets and transaction")
+        t = wallet.create_transaction(outputs_arr, account_id=0, fee=estimated_fee)
+        print("raw %s" % binascii.hexlify(t.raw()))
+        wallet.create_paper_wallets(output_keys=output_keys)
