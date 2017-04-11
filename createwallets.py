@@ -1,8 +1,8 @@
+# -*- coding: iso-8859-15 -*-
 #
 # Bulk Paper Wallets
-# (c) March 2017 1200 Development Amsterdam
-#
 # Generate Bitcoin Paper Wallets in Bulk and fund them. Wallets will be saved as PDF files.
+# © 2017 April - 1200 Web Development <http://1200wd.com/>
 #
 # Published under GNU GENERAL PUBLIC LICENSE see LICENSE file for more details.
 # WARNING: This software is still under development, only use if you understand the code and known what you are doing.
@@ -19,12 +19,14 @@ from jinja2 import Template
 from bitcoinlib.wallets import HDWallet, wallet_exists, delete_wallet, list_wallets
 from bitcoinlib.keys import HDKey
 from bitcoinlib.mnemonic import Mnemonic
-from bitcoinlib.config import networks
+from bitcoinlib.networks import Network
 from bitcoinlib.services.services import Service
+
+
 try:
-   input = raw_input
+    input = raw_input
 except NameError:
-   pass
+    pass
 
 
 DEFAULT_NETWORK = 'bitcoin'
@@ -112,21 +114,25 @@ def parse_args():
         parser.error("--output_repeat requires --outputs")
     if not pa.wallet_remove and not (pa.outputs or pa.outputs_import):
         parser.error("Either --outputs or --outputs-import should be specified")
-
     return pa
 
 if __name__ == '__main__':
+    # --- Parse commandline arguments ---
     args = parse_args()
 
     wallet_name = args.wallet_name
     network = args.network
+    network_obj = Network(network)
 
+    # List wallets, then exit
     if args.list_wallets:
         print("\nBitcoinlib wallets:")
         for w in list_wallets():
             print(w['name'])
         print("\n")
+        sys.exit()
 
+    # Delete specified wallet, then exit
     if args.wallet_remove:
         if not wallet_exists(args.wallet_remove):
             print("Wallet '%s' not found" % args.wallet_remove)
@@ -135,8 +141,10 @@ if __name__ == '__main__':
                     "\nPlease retype exact name of wallet to proceed: " % args.wallet_remove)
         if inp == args.wallet_remove:
             print(delete_wallet(args.wallet_remove))
+            print("\nWallet %s has been removed" % args.wallet_remove)
             sys.exit()
 
+    # --- Create or open wallet ---
     if wallet_exists(wallet_name):
         wallet = BulkPaperWallet(wallet_name)
         print("\nOpen wallet '%s' (%s network)" % (wallet_name, network))
@@ -156,10 +164,11 @@ if __name__ == '__main__':
         seed = binascii.hexlify(Mnemonic().to_seed(words))
         hdkey = HDKey().from_seed(seed, network=network)
         wallet = BulkPaperWallet.create(name=wallet_name, network=network, key=hdkey.extended_wif())
-        wallet.new_account("Inputs", 0)
+        # wallet.new_account("Inputs", 0)
         wallet.new_key("Input", 0)
         wallet.new_account("Outputs", 1)
 
+    # --- Create array with outputs ---
     if args.outputs_import:
         pass
         # TODO: import amount and wallet names from csv
@@ -169,7 +178,8 @@ if __name__ == '__main__':
     outputs_arr = []
     output_keys = []
     total_amount = 0
-    denominator = float(networks.NETWORKS[network]['denominator'])
+    # denominator = float(networks.NETWORKS[network]['denominator'])
+    denominator = float(network_obj.denominator)
     for o in outputs:
         nk = wallet.new_key()
         output_keys.append(nk)
@@ -177,13 +187,16 @@ if __name__ == '__main__':
         outputs_arr.append((nk.address, amount))
         total_amount += amount
 
+    # --- Estimate transaction fees ---
+    # TODO: get fees via API
     estimated_fee = (200 + len(outputs_arr*50)) * 200
-    print("Estimated fee is for this transaction is %s" % networks.print_value(estimated_fee, network))
-    print("Total value of outputs is %s" % networks.print_value(total_amount, network))
+    print("Estimated fee is for this transaction is %s" % network_obj.print_value(estimated_fee))
+    print("Total value of outputs is %s" % network_obj.print_value(total_amount))
     total_transaction = total_amount + estimated_fee
     # if args.input_key:
     #     TODO write code to look for UTXO's
 
+    # --- Check for UTXO's and create transaction and Paper wallets
     input_key = wallet.keys(name="Input")[0]
     wallet.updateutxos(0, input_key.id)
     input_key = wallet.keys(name="Input")[0]
@@ -194,9 +207,11 @@ if __name__ == '__main__':
         ki_img.save(file_inputcode, 'PNG')
         print("\nNot enough funds in wallet to create transaction.\nPlease transfer %s to "
               "address %s and restart this program.\nYou can find a QR code in %s" %
-              (networks.print_value(total_transaction - input_key.balance, network), input_key.address, file_inputcode))
+              (network_obj.print_value(total_transaction - input_key.balance), input_key.address, file_inputcode))
     else:
         print("\nEnough input(s) to spent found, create wallets and transaction")
         t = wallet.create_transaction(outputs_arr, account_id=0, fee=estimated_fee)
         print("raw %s" % binascii.hexlify(t.raw()))
         wallet.create_paper_wallets(output_keys=output_keys)
+
+        # TODO: Push transaction to network with Service class sendrawtransaction method
