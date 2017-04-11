@@ -31,7 +31,7 @@ except NameError:
 
 DEFAULT_NETWORK = 'bitcoin'
 DEFAULT_WALLET_NAME = "Bulk Paper Wallet"
-INSTALL_DIR = os.path.dirname(__file__)
+INSTALL_DIR = os.path.dirname(os.path.abspath(__file__))
 WALLET_DIR = os.path.join(INSTALL_DIR, 'wallets')
 if not os.path.exists(WALLET_DIR):
     os.makedirs(WALLET_DIR)
@@ -64,7 +64,7 @@ class BulkPaperWallet(HDWallet):
             filename_pre = "%s/%d-" % (WALLET_DIR, wallet_key.key_id)
             address_img.save(filename_pre+'address.png', 'PNG')
 
-            priv_img = qrcode.make(wallet_key.k.private().wif())
+            priv_img = qrcode.make(wallet_key.key_wif)
             priv_img.save(filename_pre+'privatekey.png', 'PNG')
 
             f = open('wallet_template.html', 'r')
@@ -74,12 +74,12 @@ class BulkPaperWallet(HDWallet):
                 install_dir=INSTALL_DIR,
                 filename_pre=filename_pre,
                 wallet_name=wallet_name,
-                private_key=wallet_key.k.private().wif(),
+                private_key=wallet_key.key_wif,
                 address=wallet_key.address)
             print("Generate wallet %d" % wallet_key.key_id)
             pdfkit.from_string(wallet_str, filename_pre+'wallet.pdf')
             count += 1
-        print("A total of %d paper wallets has been created" % count)
+        print("A total of %d paper wallets have been created" % count)
 
 
 def parse_args():
@@ -210,8 +210,11 @@ if __name__ == '__main__':
               (network_obj.print_value(total_transaction - input_key.balance), input_key.address, file_inputcode))
     else:
         print("\nEnough input(s) to spent found, create wallets and transaction")
-        t = wallet.create_transaction(outputs_arr, account_id=0, fee=estimated_fee)
+        t = wallet.create_transaction(outputs_arr, account_id=0, fee=estimated_fee, min_confirms=0)
         print("raw %s" % binascii.hexlify(t.raw()))
         wallet.create_paper_wallets(output_keys=output_keys)
 
         # TODO: Push transaction to network with Service class sendrawtransaction method
+
+        # Transaction pushed to the network, txid: ...
+        print("\nPaper wallets can be found in the %s directory" % WALLET_DIR)
