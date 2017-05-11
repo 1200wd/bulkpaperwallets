@@ -189,25 +189,27 @@ if __name__ == '__main__':
     # --- Check for UTXO's and create transaction and Paper wallets
     input_key = wallet.keys(name="Input")[0]
     wallet.updateutxos(0, input_key.id)
+    print("\nTotal wallet balance: %.5f" % wallet.balance())
     input_key = wallet.keys(name="Input")[0]
     if input_key.balance < total_transaction:
+        remaining_balance = total_transaction - input_key.balance
         file_inputcode = os.path.join(WALLET_DIR, str(wallet.wallet_id) + '-input-address-qrcode.png')
         networklink = network
         if networklink == 'testnet':
             networklink = 'bitcoin'
-        paymentlink = '%s:%s?amount=%.8f' % (networklink, input_key.address, total_transaction*denominator)
+        paymentlink = '%s:%s?amount=%.8f' % (networklink, input_key.address, remaining_balance*denominator)
         ki_img = qrcode.make(paymentlink)
         ki_img.save(file_inputcode, 'PNG')
         print("\nNot enough funds in wallet to create transaction.\nPlease transfer %s to "
               "address %s and restart this program.\nYou can find a QR code in %s" %
-              (network_obj.print_value(total_transaction - input_key.balance), input_key.address, file_inputcode))
+              (network_obj.print_value(remaining_balance), input_key.address, file_inputcode))
     else:
         print("\nEnough input(s) to spent found, create wallets and transaction")
-        t = wallet.send(outputs_arr, account_id=0, transaction_fee=estimated_fee, min_confirms=0)
-        print("raw %s" % binascii.hexlify(t.raw()))
+        tx_id = wallet.send(outputs_arr, account_id=0, transaction_fee=estimated_fee, min_confirms=0)
+        # raw_tx = t.raw()
+        # print("Raw transaction: %s" % binascii.hexlify(raw_tx))
         wallet.create_paper_wallets(output_keys=output_keys)
 
-        # TODO: Push transaction to network with Service class sendrawtransaction method
-
-        # Transaction pushed to the network, txid: ...
+        # tx_id = srv.sendrawtransaction(tx_id)
+        print("\nTransaction pushed to the network, txid: %s" % tx_id)
         print("\nPaper wallets can be found in the %s directory" % WALLET_DIR)
