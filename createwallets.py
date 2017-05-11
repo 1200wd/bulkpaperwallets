@@ -191,7 +191,9 @@ if __name__ == '__main__':
 
     # --- Estimate transaction fees ---
     # TODO: get fees via API
-    estimated_fee = (200 + len(outputs_arr*50)) * 200
+    srv = Service(network=network)
+    fee_per_byte = int(srv.estimatefee() / 1024)
+    estimated_fee = (200 + len(outputs_arr*50)) * fee_per_byte
     print("Estimated fee is for this transaction is %s" % network_obj.print_value(estimated_fee))
     print("Total value of outputs is %s" % network_obj.print_value(total_amount))
     total_transaction = total_amount + estimated_fee
