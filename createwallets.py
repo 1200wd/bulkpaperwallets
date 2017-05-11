@@ -39,24 +39,6 @@ if not os.path.exists(WALLET_DIR):
 
 class BulkPaperWallet(HDWallet):
 
-    # def create_bulk_transaction(self, wallet):
-    #     # Create Transaction and add input and outputs
-    #     t = Transaction(network=self.network)
-    #     ki = Key(input_pk)
-    #     t.add_input(input_utxo, input_index, public_key=ki.public())
-    #
-    #     output_keys = []
-    #     for _ in range(0, OUTPUT_NUMBER):
-    #         nk = wallet.new_key()
-    #         t.add_output(OUTPUT_AMOUNT, address=nk.address)
-    #         output_keys.append(nk)
-    #
-    #     t.sign(ki.private_byte(), 0)
-    #     if not t.verify():
-    #         raise Exception("Could not verify this transaction: %s" % t.get())
-    #
-    #     return
-
     def create_paper_wallets(self, output_keys):
         count = 0
         for wallet_key in output_keys:
@@ -197,7 +179,6 @@ if __name__ == '__main__':
     fee_per_byte = int(srv.estimatefee() / 1000)
     if not srv.results:
         raise ConnectionError("No response from services, could not determine estimated transaction fees")
-    print(srv.results)
     estimated_fee = (200 + len(outputs_arr*50)) * fee_per_byte
     print("Estimated fee is for this transaction is %s" % network_obj.print_value(estimated_fee))
     print("Total value of outputs is %s" % network_obj.print_value(total_amount))
@@ -211,7 +192,10 @@ if __name__ == '__main__':
     input_key = wallet.keys(name="Input")[0]
     if input_key.balance < total_transaction:
         file_inputcode = os.path.join(WALLET_DIR, str(wallet.wallet_id) + '-input-address-qrcode.png')
-        paymentlink = '%s:%s?amount=%.8f' % (network, input_key.address, total_transaction*denominator)
+        networklink = network
+        if networklink == 'testnet':
+            networklink = 'bitcoin'
+        paymentlink = '%s:%s?amount=%.8f' % (networklink, input_key.address, total_transaction*denominator)
         ki_img = qrcode.make(paymentlink)
         ki_img.save(file_inputcode, 'PNG')
         print("\nNot enough funds in wallet to create transaction.\nPlease transfer %s to "
@@ -219,7 +203,7 @@ if __name__ == '__main__':
               (network_obj.print_value(total_transaction - input_key.balance), input_key.address, file_inputcode))
     else:
         print("\nEnough input(s) to spent found, create wallets and transaction")
-        t = wallet.create_transaction(outputs_arr, account_id=0, fee=estimated_fee, min_confirms=0)
+        t = wallet.send(outputs_arr, account_id=0, transaction_fee=estimated_fee, min_confirms=0)
         print("raw %s" % binascii.hexlify(t.raw()))
         wallet.create_paper_wallets(output_keys=output_keys)
 
