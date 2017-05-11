@@ -112,7 +112,7 @@ def parse_args():
     pa = parser.parse_args()
     if pa.outputs_repeat and pa.outputs is None:
         parser.error("--output_repeat requires --outputs")
-    if not pa.wallet_remove and not (pa.outputs or pa.outputs_import):
+    if not pa.wallet_remove and not pa.list_wallets and not (pa.outputs or pa.outputs_import):
         parser.error("Either --outputs or --outputs-import should be specified")
     return pa
 
@@ -153,7 +153,9 @@ if __name__ == '__main__':
         if not args.recover_wallet_passphrase:
             words = Mnemonic('english').generate()
             print("\nYour mnemonic private key sentence is: %s" % words)
-            print("\nPlease write down on paper and backup. IF YOU LOSE THIS PRIVATE KEY ALL COINS ARE LOST!")
+            print("\nPlease write down on paper and backup. With this key you can restore all paper wallets if "
+                  "something goes wrong during this process. You can / have to throw away this private key after "
+                  "the paper wallets are distributed.")
             inp = input("\nType 'yes' if you understood and wrote down your key: ")
             if inp not in ['yes', 'Yes', 'YES']:
                 print("Exiting...")
@@ -170,7 +172,7 @@ if __name__ == '__main__':
 
     # --- Create array with outputs ---
     if args.outputs_import:
-        pass
+        outputs = []
         # TODO: import amount and wallet names from csv
     else:
         outputs = [{'amount': o, 'name': ''} for o in args.outputs]
