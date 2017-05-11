@@ -147,6 +147,10 @@ if __name__ == '__main__':
     # --- Create or open wallet ---
     if wallet_exists(wallet_name):
         wallet = BulkPaperWallet(wallet_name)
+        if wallet.network.network_name != args.network:
+            print("\nNetwork setting (%s) ignored. Using network from defined wallet instead: %s" %
+                  (args.network, wallet.network.network_name))
+            network = wallet.network.network_name
         print("\nOpen wallet '%s' (%s network)" % (wallet_name, network))
     else:
         print("\nCREATE wallet '%s' (%s network)" % (wallet_name, network))
@@ -180,7 +184,6 @@ if __name__ == '__main__':
     outputs_arr = []
     output_keys = []
     total_amount = 0
-    # denominator = float(networks.NETWORKS[network]['denominator'])
     denominator = float(network_obj.denominator)
     for o in outputs:
         nk = wallet.new_key()
@@ -190,9 +193,11 @@ if __name__ == '__main__':
         total_amount += amount
 
     # --- Estimate transaction fees ---
-    # TODO: get fees via API
     srv = Service(network=network)
-    fee_per_byte = int(srv.estimatefee() / 1024)
+    fee_per_byte = int(srv.estimatefee() / 1000)
+    if not srv.results:
+        raise ConnectionError("No response from services, could not determine estimated transaction fees")
+    print(srv.results)
     estimated_fee = (200 + len(outputs_arr*50)) * fee_per_byte
     print("Estimated fee is for this transaction is %s" % network_obj.print_value(estimated_fee))
     print("Total value of outputs is %s" % network_obj.print_value(total_amount))
@@ -206,7 +211,7 @@ if __name__ == '__main__':
     input_key = wallet.keys(name="Input")[0]
     if input_key.balance < total_transaction:
         file_inputcode = os.path.join(WALLET_DIR, str(wallet.wallet_id) + '-input-address-qrcode.png')
-        paymentlink = 'bitcoin:%s?amount=%.8f' % (input_key.address, total_transaction*denominator)
+        paymentlink = '%s:%s?amount=%.8f' % (network, input_key.address, total_transaction*denominator)
         ki_img = qrcode.make(paymentlink)
         ki_img.save(file_inputcode, 'PNG')
         print("\nNot enough funds in wallet to create transaction.\nPlease transfer %s to "
