@@ -165,7 +165,7 @@ if __name__ == '__main__':
 
         seed = binascii.hexlify(Mnemonic().to_seed(words))
         hdkey = HDKey().from_seed(seed, network=network)
-        wallet = BulkPaperWallet.create(name=wallet_name, network=network, key=hdkey.extended_wif())
+        wallet = BulkPaperWallet.create(name=wallet_name, network=network, key=hdkey.wif())
         # wallet.new_account("Inputs", 0)
         wallet.new_key("Input", 0)
         wallet.new_account("Outputs", 1)
