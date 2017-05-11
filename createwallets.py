@@ -46,7 +46,7 @@ class BulkPaperWallet(HDWallet):
             filename_pre = "%s/%d-" % (WALLET_DIR, wallet_key.key_id)
             address_img.save(filename_pre+'address.png', 'PNG')
 
-            priv_img = qrcode.make(wallet_key.key_wif)
+            priv_img = qrcode.make(wallet_key.wif)
             priv_img.save(filename_pre+'privatekey.png', 'PNG')
 
             f = open('wallet_template.html', 'r')
@@ -56,7 +56,7 @@ class BulkPaperWallet(HDWallet):
                 install_dir=INSTALL_DIR,
                 filename_pre=filename_pre,
                 wallet_name=wallet_name,
-                private_key=wallet_key.key_wif,
+                private_key=wallet_key.wif,
                 address=wallet_key.address)
             print("Generate wallet %d" % wallet_key.key_id)
             pdfkit.from_string(wallet_str, filename_pre+'wallet.pdf')
