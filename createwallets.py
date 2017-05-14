@@ -88,13 +88,15 @@ def parse_args():
                         help="Name of wallet to remove, all keys and related information will be deleted")
     parser.add_argument('--list-wallets', '-l', action='store_true',
                         help="List all known wallets in bitcoinlib database")
+    parser.add_argument('--wallet-info', '-i', default=DEFAULT_WALLET_NAME,
+                        help="List all known wallets in bitcoinlib database")
     parser.add_argument('--recover-wallet-passphrase',
                         help="Passphrase of 12 words to recover and regenerate a previous wallet")
 
     pa = parser.parse_args()
     if pa.outputs_repeat and pa.outputs is None:
         parser.error("--output_repeat requires --outputs")
-    if not pa.wallet_remove and not pa.list_wallets and not (pa.outputs or pa.outputs_import):
+    if not pa.wallet_remove and not pa.list_wallets and not pa.wallet_info and not (pa.outputs or pa.outputs_import):
         parser.error("Either --outputs or --outputs-import should be specified")
     return pa
 
@@ -112,6 +114,15 @@ if __name__ == '__main__':
         for w in list_wallets():
             print(w['name'])
         print("\n")
+        sys.exit()
+
+    if args.wallet_info:
+        print("Wallet info for %s" % args.wallet_info)
+        if wallet_exists(args.wallet_info):
+            wallet = BulkPaperWallet(args.wallet_info)
+            wallet.info()
+        else:
+            raise ValueError("Wallet '%s' not found" % args.wallet_info)
         sys.exit()
 
     # Delete specified wallet, then exit
