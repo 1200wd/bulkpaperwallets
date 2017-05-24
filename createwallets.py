@@ -36,6 +36,14 @@ WALLET_DIR = os.path.join(INSTALL_DIR, 'wallets')
 if not os.path.exists(WALLET_DIR):
     os.makedirs(WALLET_DIR)
 
+pdfkit_options = {
+    'page-size': 'A4',
+    'margin-top': '0.25in',
+    'margin-right': '0.25in',
+    'margin-bottom': '0.25in',
+    'margin-left': '0.25in',
+    'encoding': "UTF-8",
+}
 
 class BulkPaperWallet(HDWallet):
 
@@ -46,7 +54,8 @@ class BulkPaperWallet(HDWallet):
             filename_pre = "%s/%d-" % (WALLET_DIR, wallet_key.key_id)
             address_img.save(filename_pre+'address.png', 'PNG')
 
-            priv_img = qrcode.make(wallet_key.wif)
+            private_wif = wallet_key.key().key.wif()
+            priv_img = qrcode.make(private_wif)
             priv_img.save(filename_pre+'privatekey.png', 'PNG')
 
             f = open('wallet_template.html', 'r')
@@ -56,10 +65,10 @@ class BulkPaperWallet(HDWallet):
                 install_dir=INSTALL_DIR,
                 filename_pre=filename_pre,
                 wallet_name=wallet_name,
-                private_key=wallet_key.wif,
+                private_key=private_wif,
                 address=wallet_key.address)
             print("Generate wallet %d" % wallet_key.key_id)
-            pdfkit.from_string(wallet_str, filename_pre+'wallet.pdf')
+            pdfkit.from_string(wallet_str, filename_pre+'wallet.pdf', options=pdfkit_options, css='style.css')
             count += 1
         print("A total of %d paper wallets have been created" % count)
 
@@ -215,12 +224,13 @@ if __name__ == '__main__':
               "address %s and restart this program.\nYou can find a QR code in %s" %
               (network_obj.print_value(remaining_balance), input_key.address, file_inputcode))
     else:
-        print("\nEnough input(s) to spent found, create wallets and transaction")
-        tx_id = wallet.send(outputs_arr, account_id=0, transaction_fee=estimated_fee, min_confirms=0)
-        # raw_tx = t.raw()
-        # print("Raw transaction: %s" % binascii.hexlify(raw_tx))
+        print("\nEnough input(s) to spent found, ready to create wallets and transaction")
+        inp = input("\nType 'y' to continue: ")
+        if inp not in ['y', 'Y']:
+            print("Exiting...")
+            sys.exit()
         wallet.create_paper_wallets(output_keys=output_keys)
+        # tx_id = wallet.send(outputs_arr, account_id=0, transaction_fee=estimated_fee, min_confirms=0)
 
-        # tx_id = srv.sendrawtransaction(tx_id)
         print("\nTransaction pushed to the network, txid: %s" % tx_id)
         print("\nPaper wallets can be found in the %s directory" % WALLET_DIR)
