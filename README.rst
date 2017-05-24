@@ -18,6 +18,10 @@ Uses the bitcoinlib Bitcoin Library
 
 ``pip install bitcoinlib``
 
+And libraries to generate PDF paper wallets with Jinja template markup and QR code's
+
+``pip install qrcode pdfkit jinja2``
+
 
 Usage reference
 ---------------

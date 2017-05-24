@@ -88,7 +88,7 @@ def parse_args():
                         help="Name of wallet to remove, all keys and related information will be deleted")
     parser.add_argument('--list-wallets', '-l', action='store_true',
                         help="List all known wallets in bitcoinlib database")
-    parser.add_argument('--wallet-info', '-i', default=DEFAULT_WALLET_NAME,
+    parser.add_argument('--wallet-info', '-i',
                         help="List all known wallets in bitcoinlib database")
     parser.add_argument('--recover-wallet-passphrase',
                         help="Passphrase of 12 words to recover and regenerate a previous wallet")
