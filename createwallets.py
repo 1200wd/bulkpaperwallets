@@ -230,7 +230,7 @@ if __name__ == '__main__':
             print("Exiting...")
             sys.exit()
         wallet.create_paper_wallets(output_keys=output_keys)
-        # tx_id = wallet.send(outputs_arr, account_id=0, transaction_fee=estimated_fee, min_confirms=0)
+        tx_id = wallet.send(outputs_arr, account_id=0, transaction_fee=estimated_fee, min_confirms=0)
 
         print("\nTransaction pushed to the network, txid: %s" % tx_id)
         print("\nPaper wallets can be found in the %s directory" % WALLET_DIR)
