@@ -22,6 +22,11 @@ And libraries to generate PDF paper wallets with Jinja template markup and QR co
 
 ``pip install qrcode pdfkit jinja2``
 
+And the libraries to generate a PDF from HTML
+(see https://github.com/JazzCore/python-pdfkit/wiki/Installing-wkhtmltopdf for other OS):
+
+``apt install wkhtmltopdf``
+
 
 Usage reference
 ---------------

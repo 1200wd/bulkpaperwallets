@@ -81,9 +81,6 @@ def parse_args():
     parser.add_argument('--outputs-repeat', '-r', type=int, default=1,
                         help="Repeat the outputs OUTPUTS_REPEAT times. For example 'createwallet.py -o 5 -r 10' "
                              "will create 10 wallets with 5 bitcoin")
-    # parser.add_argument('--input-key', '-i',
-    #                     help="Private key to create transaction input. If not specified a private key "
-    #                          "and address to send bitcoins to will be created")
     parser.add_argument('--wallet-remove',
                         help="Name of wallet to remove, all keys and related information will be deleted")
     parser.add_argument('--list-wallets', '-l', action='store_true',
@@ -144,6 +141,7 @@ if __name__ == '__main__':
             print("\nNetwork setting (%s) ignored. Using network from defined wallet instead: %s" %
                   (args.network, wallet.network.network_name))
             network = wallet.network.network_name
+            network_obj = Network(network)
         print("\nOpen wallet '%s' (%s network)" % (wallet_name, network))
     else:
         print("\nCREATE wallet '%s' (%s network)" % (wallet_name, network))
@@ -193,14 +191,11 @@ if __name__ == '__main__':
     fee_per_byte = int(srv.estimatefee() / 1000)
     if not srv.results:
         raise ConnectionError("No response from services, could not determine estimated transaction fees")
-    print(srv.results)
     estimated_fee = srv.estimate_fee_for_transaction(no_outputs=len(outputs_arr))
     print("Estimated fee is for this transaction is %s (%d satoshis/byte)" %
           (network_obj.print_value(estimated_fee), fee_per_byte))
     print("Total value of outputs is %s" % network_obj.print_value(total_amount))
     total_transaction = total_amount + estimated_fee
-    # if args.input_key:
-    #     TODO write code to look for UTXO's
 
     # --- Check for UTXO's and create transaction and Paper wallets
     input_key = wallet.keys(name="Input")[0]
