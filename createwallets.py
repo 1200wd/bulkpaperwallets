@@ -78,7 +78,7 @@ def parse_args():
     group1.add_argument('--outputs-import', '-f',
                         help="Filename of comma seperated value list of output values and optional wallet names. "
                              "Example: 1.51, John")
-    parser.add_argument('--outputs-repeat', '-r', type=int,
+    parser.add_argument('--outputs-repeat', '-r', type=int, default=1,
                         help="Repeat the outputs OUTPUTS_REPEAT times. For example 'createwallet.py -o 5 -r 10' "
                              "will create 10 wallets with 5 bitcoin")
     # parser.add_argument('--input-key', '-i',
@@ -168,11 +168,14 @@ if __name__ == '__main__':
         wallet.new_account("Outputs", 1)
 
     # --- Create array with outputs ---
+    outputs = []
     if args.outputs_import:
-        outputs = []
+        pass
         # TODO: import amount and wallet names from csv
     else:
-        outputs = [{'amount': o, 'name': ''} for o in args.outputs]
+        output_list = [{'amount': o, 'name': ''} for o in args.outputs]
+        for r in range(0, args.outputs_repeat):
+            outputs += output_list
 
     outputs_arr = []
     output_keys = []
@@ -190,8 +193,10 @@ if __name__ == '__main__':
     fee_per_byte = int(srv.estimatefee() / 1000)
     if not srv.results:
         raise ConnectionError("No response from services, could not determine estimated transaction fees")
-    estimated_fee = (200 + len(outputs_arr*50)) * fee_per_byte
-    print("Estimated fee is for this transaction is %s" % network_obj.print_value(estimated_fee))
+    print(srv.results)
+    estimated_fee = srv.estimate_fee_for_transaction(no_outputs=len(outputs_arr))
+    print("Estimated fee is for this transaction is %s (%d satoshis/byte)" %
+          (network_obj.print_value(estimated_fee), fee_per_byte))
     print("Total value of outputs is %s" % network_obj.print_value(total_amount))
     total_transaction = total_amount + estimated_fee
     # if args.input_key:
