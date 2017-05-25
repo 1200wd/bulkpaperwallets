@@ -126,6 +126,7 @@ if __name__ == '__main__':
         print("Wallet info for %s" % args.wallet_info)
         if wallet_exists(args.wallet_info):
             wallet = BulkPaperWallet(args.wallet_info)
+            wallet.updateutxos()
             wallet.info()
         else:
             raise ValueError("Wallet '%s' not found" % args.wallet_info)
