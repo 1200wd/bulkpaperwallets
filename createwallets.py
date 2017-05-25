@@ -142,7 +142,7 @@ if __name__ == '__main__':
         inp = input("\nWallet '%s' with all keys and will be removed, without private key it cannot be restored."
                     "\nPlease retype exact name of wallet to proceed: " % args.wallet_remove)
         if inp == args.wallet_remove:
-            if delete_wallet(args.wallet_remove):
+            if delete_wallet(args.wallet_remove, force=True):
                 print("\nWallet %s has been removed" % args.wallet_remove)
             else:
                 print("\nError when deleting wallet")
@@ -184,7 +184,12 @@ if __name__ == '__main__':
 
     if args.recover_wallet_passphrase:
         print("Wallet recovered, now updating keys and balances...")
-        wallet.updateutxos()
+        stuff_updated = True
+        while stuff_updated:
+            for kn in range(0, 10):
+                wallet.new_key(account_id=1)
+                wallet.new_key_change(account_id=1)
+            stuff_updated = wallet.updateutxos()
         wallet.info()
         sys.exit()
 
