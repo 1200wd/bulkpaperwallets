@@ -103,7 +103,8 @@ def parse_args():
     pa = parser.parse_args()
     if pa.outputs_repeat and pa.outputs is None:
         parser.error("--output_repeat requires --outputs")
-    if not pa.wallet_remove and not pa.list_wallets and not pa.wallet_info and not (pa.outputs or pa.outputs_import):
+    if not pa.wallet_remove and not pa.list_wallets and not pa.wallet_info and not pa.recover_wallet_passphrase and \
+            not (pa.outputs or pa.outputs_import):
         parser.error("Either --outputs or --outputs-import should be specified")
     return pa
 
@@ -141,12 +142,18 @@ if __name__ == '__main__':
         inp = input("\nWallet '%s' with all keys and will be removed, without private key it cannot be restored."
                     "\nPlease retype exact name of wallet to proceed: " % args.wallet_remove)
         if inp == args.wallet_remove:
-            print(delete_wallet(args.wallet_remove))
-            print("\nWallet %s has been removed" % args.wallet_remove)
+            if delete_wallet(args.wallet_remove):
+                print("\nWallet %s has been removed" % args.wallet_remove)
+            else:
+                print("\nError when deleting wallet")
             sys.exit()
 
     # --- Create or open wallet ---
     if wallet_exists(wallet_name):
+        if args.recover_wallet_passphrase:
+            print("\nWallet %s already exists. Please specify (not existing) wallet name for wallet to recover" %
+                  wallet_name)
+            sys.exit()
         wallet = BulkPaperWallet(wallet_name)
         if wallet.network.network_name != args.network:
             print("\nNetwork setting (%s) ignored. Using network from defined wallet instead: %s" %
@@ -172,9 +179,14 @@ if __name__ == '__main__':
         seed = binascii.hexlify(Mnemonic().to_seed(words))
         hdkey = HDKey().from_seed(seed, network=network)
         wallet = BulkPaperWallet.create(name=wallet_name, network=network, key=hdkey.wif())
-        # wallet.new_account("Inputs", 0)
         wallet.new_key("Input", 0)
         wallet.new_account("Outputs", 1)
+
+    if args.recover_wallet_passphrase:
+        print("Wallet recovered, now updating keys and balances...")
+        wallet.updateutxos()
+        wallet.info()
+        sys.exit()
 
     # --- Create array with outputs ---
     outputs = []
