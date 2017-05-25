@@ -35,6 +35,7 @@ INSTALL_DIR = os.path.dirname(os.path.abspath(__file__))
 WALLET_DIR = os.path.join(INSTALL_DIR, 'wallets')
 if not os.path.exists(WALLET_DIR):
     os.makedirs(WALLET_DIR)
+OUTPUT_ACCOUNT_ID = 1
 
 pdfkit_options = {
     'page-size': 'A4',
@@ -179,16 +180,16 @@ if __name__ == '__main__':
         seed = binascii.hexlify(Mnemonic().to_seed(words))
         hdkey = HDKey().from_seed(seed, network=network)
         wallet = BulkPaperWallet.create(name=wallet_name, network=network, key=hdkey.wif())
-        wallet.new_key("Input", account_id=0)
-        wallet.new_account("Outputs", account_id=1)
+        wallet.new_key("Input")
+        wallet.new_account("Outputs", account_id=OUTPUT_ACCOUNT_ID)
 
     if args.recover_wallet_passphrase:
         print("Wallet recovered, now updating keys and balances...")
         stuff_updated = True
         while stuff_updated:
             for kn in range(0, 10):
-                wallet.new_key(account_id=1)
-                wallet.new_key_change(account_id=1)
+                wallet.new_key(account_id=OUTPUT_ACCOUNT_ID)
+                wallet.new_key_change(account_id=OUTPUT_ACCOUNT_ID)
             stuff_updated = wallet.updateutxos()
         wallet.info()
         sys.exit()
@@ -211,7 +212,7 @@ if __name__ == '__main__':
     total_amount = 0
     denominator = float(network_obj.denominator)
     for o in outputs:
-        nk = wallet.new_key(account_id=1)
+        nk = wallet.new_key(account_id=OUTPUT_ACCOUNT_ID)
         output_keys.append(nk)
         amount = int(o['amount'] * (1/denominator))
         outputs_arr.append((nk.address, amount))
