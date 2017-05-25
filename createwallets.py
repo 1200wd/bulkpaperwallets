@@ -179,8 +179,8 @@ if __name__ == '__main__':
         seed = binascii.hexlify(Mnemonic().to_seed(words))
         hdkey = HDKey().from_seed(seed, network=network)
         wallet = BulkPaperWallet.create(name=wallet_name, network=network, key=hdkey.wif())
-        wallet.new_key("Input", 0)
-        wallet.new_account("Outputs", 1)
+        wallet.new_key("Input", account_id=0)
+        wallet.new_account("Outputs", account_id=1)
 
     if args.recover_wallet_passphrase:
         print("Wallet recovered, now updating keys and balances...")
@@ -211,7 +211,7 @@ if __name__ == '__main__':
     total_amount = 0
     denominator = float(network_obj.denominator)
     for o in outputs:
-        nk = wallet.new_key()
+        nk = wallet.new_key(account_id=1)
         output_keys.append(nk)
         amount = int(o['amount'] * (1/denominator))
         outputs_arr.append((nk.address, amount))
