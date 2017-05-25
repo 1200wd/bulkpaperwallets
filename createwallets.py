@@ -45,6 +45,7 @@ pdfkit_options = {
     'encoding': "UTF-8",
 }
 
+
 class BulkPaperWallet(HDWallet):
 
     def create_paper_wallets(self, output_keys):
@@ -87,7 +88,7 @@ def parse_args():
     group1.add_argument('--outputs-import', '-f',
                         help="Filename of comma seperated value list of output values and optional wallet names. "
                              "Example: 1.51, John")
-    parser.add_argument('--outputs-repeat', '-r', type=int, default=1,
+    parser.add_argument('--outputs-repeat', '-r', type=int,
                         help="Repeat the outputs OUTPUTS_REPEAT times. For example 'createwallet.py -o 5 -r 10' "
                              "will create 10 wallets with 5 bitcoin")
     parser.add_argument('--wallet-remove',
@@ -182,7 +183,10 @@ if __name__ == '__main__':
         # TODO: import amount and wallet names from csv
     else:
         output_list = [{'amount': o, 'name': ''} for o in args.outputs]
-        for r in range(0, args.outputs_repeat):
+        repeat_n = 1
+        if args.outputs_repeat:
+            repeat_n = args.outputs_repeat
+        for r in range(0, repeat_n):
             outputs += output_list
 
     outputs_arr = []
