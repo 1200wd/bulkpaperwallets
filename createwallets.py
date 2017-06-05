@@ -220,12 +220,13 @@ if __name__ == '__main__':
 
     # --- Estimate transaction fees ---
     srv = Service(network=network)
-    fee_per_byte = int(srv.estimatefee() / 1000)
+    fee_per_kb = srv.estimatefee()
     if not srv.results:
         raise ConnectionError("No response from services, could not determine estimated transaction fees")
-    estimated_fee = srv.estimate_fee_for_transaction(no_outputs=len(outputs_arr))
-    print("Estimated fee is for this transaction is %s (%d satoshis/byte)" %
-          (network_obj.print_value(estimated_fee), fee_per_byte))
+    tr_size = 100 + (1 * 150) + (len(outputs_arr) * 50)
+    estimated_fee = int((tr_size / 1024) * fee_per_kb)
+    print("Estimated fee is for this transaction is %s (%d satoshis/kb)" %
+          (network_obj.print_value(estimated_fee), fee_per_kb))
     print("Total value of outputs is %s" % network_obj.print_value(total_amount))
     total_transaction = total_amount + estimated_fee
 
