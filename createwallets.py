@@ -100,12 +100,14 @@ def parse_args():
                         help="List all known wallets in bitcoinlib database")
     parser.add_argument('--recover-wallet-passphrase',
                         help="Passphrase of 12 words to recover and regenerate a previous wallet")
+    parser.add_argument('--test-pdf', action='store_true',
+                        help="Generate a single preview PDF paper wallet. Contains dummy keys")
 
     pa = parser.parse_args()
     if pa.outputs_repeat and pa.outputs is None:
         parser.error("--output_repeat requires --outputs")
-    if not pa.wallet_remove and not pa.list_wallets and not pa.wallet_info and not pa.recover_wallet_passphrase and \
-            not (pa.outputs or pa.outputs_import):
+    if not pa.wallet_remove and not pa.list_wallets and not pa.wallet_info and not pa.recover_wallet_passphrase \
+            and not pa.test_pdf and not (pa.outputs or pa.outputs_import):
         parser.error("Either --outputs or --outputs-import should be specified")
     return pa
 
@@ -148,6 +150,18 @@ if __name__ == '__main__':
             else:
                 print("\nError when deleting wallet")
             sys.exit()
+
+    # Generate a test wallet preview PDF
+    if args.test_pdf:
+        if wallet_exists('BPW_pdf_test_tmp'):
+            wallet = BulkPaperWallet('BPW_pdf_test_tmp')
+        else:
+            wallet = BulkPaperWallet.create('BPW_pdf_test_tmp', network='testnet')
+        test_key = wallet.get_key()
+        wallet.create_paper_wallets(output_keys=[test_key])
+
+        delete_wallet('BPW_pdf_test_tmp')
+        sys.exit()
 
     # --- Create or open wallet ---
     if wallet_exists(wallet_name):
