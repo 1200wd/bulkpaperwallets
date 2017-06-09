@@ -44,10 +44,15 @@ pdfkit_options = {
     'margin-bottom': '0.25in',
     'margin-left': '0.25in',
     'encoding': "UTF-8",
+    # 'disable-smart-shrinking': '',
+    # 'dpi': 400,
 }
 
 
 class BulkPaperWallet(HDWallet):
+
+    # def __init__(self, wallet, databasefile=None, main_key_object=None):
+    #     pass
 
     def create_paper_wallets(self, output_keys):
         count = 0
@@ -73,6 +78,11 @@ class BulkPaperWallet(HDWallet):
             pdfkit.from_string(wallet_str, filename_pre+'wallet.pdf', options=pdfkit_options, css='style.css')
             count += 1
         print("A total of %d paper wallets have been created" % count)
+
+    @classmethod
+    def create(cls, name, key='', owner='', network=None, account_id=0, purpose=44, databasefile=None):
+        return super(BulkPaperWallet, cls).create(name=name, key=key, network=network, account_id=account_id,
+                                                  purpose=purpose, databasefile=databasefile)
 
 
 def parse_args():
@@ -156,7 +166,8 @@ if __name__ == '__main__':
         if wallet_exists('BPW_pdf_test_tmp'):
             wallet = BulkPaperWallet('BPW_pdf_test_tmp')
         else:
-            wallet = BulkPaperWallet.create('BPW_pdf_test_tmp', network='testnet')
+            wallet_obj = BulkPaperWallet
+            wallet = wallet_obj.create(name='BPW_pdf_test_tmp', network='testnet')
         test_key = wallet.get_key()
         wallet.create_paper_wallets(output_keys=[test_key])
 
