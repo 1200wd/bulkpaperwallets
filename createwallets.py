@@ -44,15 +44,11 @@ pdfkit_options = {
     'margin-bottom': '0.25in',
     'margin-left': '0.25in',
     'encoding': "UTF-8",
-    # 'disable-smart-shrinking': '',
-    # 'dpi': 400,
+    'image-dpi': 96,  # Has no effect on X11 (Unix systems)
 }
 
 
 class BulkPaperWallet(HDWallet):
-
-    # def __init__(self, wallet, databasefile=None, main_key_object=None):
-    #     pass
 
     def create_paper_wallets(self, output_keys):
         count = 0
@@ -65,7 +61,7 @@ class BulkPaperWallet(HDWallet):
             priv_img = qrcode.make(private_wif)
             priv_img.save(filename_pre+'privatekey.png', 'PNG')
 
-            f = open('wallet_template.html', 'r')
+            f = open('wallet_template_large.html', 'r')
             template = Template(f.read())
             wallet_name = "%s %d" % (self.name, wallet_key.key_id)
             wallet_str = template.render(
@@ -75,7 +71,7 @@ class BulkPaperWallet(HDWallet):
                 private_key=private_wif,
                 address=wallet_key.address)
             print("Generate wallet %d" % wallet_key.key_id)
-            pdfkit.from_string(wallet_str, filename_pre+'wallet.pdf', options=pdfkit_options, css='style.css')
+            pdfkit.from_string(wallet_str, filename_pre+'wallet.pdf', options=pdfkit_options, css='style_large.css')
             count += 1
         print("A total of %d paper wallets have been created" % count)
 
