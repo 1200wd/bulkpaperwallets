@@ -50,7 +50,7 @@ pdfkit_options = {
 
 class BulkPaperWallet(HDWallet):
 
-    def create_paper_wallets(self, output_keys):
+    def create_paper_wallets(self, output_keys, style_file, template_file):
         count = 0
         for wallet_key in output_keys:
             address_img = qrcode.make(wallet_key.address)
@@ -61,7 +61,7 @@ class BulkPaperWallet(HDWallet):
             priv_img = qrcode.make(private_wif)
             priv_img.save(filename_pre+'privatekey.png', 'PNG')
 
-            f = open('wallet_template_large.html', 'r')
+            f = open(template_file, 'r')
             template = Template(f.read())
             wallet_name = "%s %d" % (self.name, wallet_key.key_id)
             wallet_str = template.render(
@@ -71,7 +71,7 @@ class BulkPaperWallet(HDWallet):
                 private_key=private_wif,
                 address=wallet_key.address)
             print("Generate wallet %d" % wallet_key.key_id)
-            pdfkit.from_string(wallet_str, filename_pre+'wallet.pdf', options=pdfkit_options, css='style_large.css')
+            pdfkit.from_string(wallet_str, filename_pre+'wallet.pdf', options=pdfkit_options, css=style_file)
             count += 1
         print("A total of %d paper wallets have been created" % count)
 
@@ -108,6 +108,10 @@ def parse_args():
                         help="Passphrase of 12 words to recover and regenerate a previous wallet")
     parser.add_argument('--test-pdf', action='store_true',
                         help="Generate a single preview PDF paper wallet. Contains dummy keys")
+    parser.add_argument('--style', '-s', default='style.css',
+                        help="Specify style sheet file")
+    parser.add_argument('--template', '-t', default='wallet_template.html',
+                        help="Specify wallet template html file")
 
     pa = parser.parse_args()
     if pa.outputs_repeat and pa.outputs is None:
@@ -124,6 +128,8 @@ if __name__ == '__main__':
     wallet_name = args.wallet_name
     network = args.network
     network_obj = Network(network)
+    style_file = args.style
+    template_file = args.template
 
     # List wallets, then exit
     if args.list_wallets:
@@ -165,7 +171,7 @@ if __name__ == '__main__':
             wallet_obj = BulkPaperWallet
             wallet = wallet_obj.create(name='BPW_pdf_test_tmp', network='testnet')
         test_key = wallet.get_key()
-        wallet.create_paper_wallets(output_keys=[test_key])
+        wallet.create_paper_wallets([test_key], style_file, template_file)
 
         delete_wallet('BPW_pdf_test_tmp')
         sys.exit()
@@ -274,7 +280,7 @@ if __name__ == '__main__':
         if inp not in ['y', 'Y']:
             print("Exiting...")
             sys.exit()
-        wallet.create_paper_wallets(output_keys=output_keys)
+        wallet.create_paper_wallets(output_keys, style_file, template_file)
         tx_id = wallet.send(outputs_arr, account_id=0, transaction_fee=estimated_fee, min_confirms=0)
 
         print("\nTransaction pushed to the network, txid: %s" % tx_id)
