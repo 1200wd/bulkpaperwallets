@@ -272,7 +272,7 @@ if __name__ == '__main__':
         ki_img = qrcode.make(paymentlink)
         ki_img.save(file_inputcode, 'PNG')
         print("\nNot enough funds in wallet to create transaction.\nPlease transfer %s to "
-              "address %s and restart this program.\nYou can find a QR code in %s" %
+              "address %s and restart this program with EXACTLY the same options.\nYou can find a QR code in %s" %
               (network_obj.print_value(remaining_balance), input_key.address, file_inputcode))
     else:
         print("\nEnough input(s) to spent found, ready to create wallets and transaction")
