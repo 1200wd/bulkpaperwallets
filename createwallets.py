@@ -260,7 +260,7 @@ if __name__ == '__main__':
     # --- Check for UTXO's and create transaction and Paper wallets
     input_key = wallet.keys(name="Input")[0]
     wallet.updateutxos(0, input_key.id)
-    print("\nTotal wallet balance: %.5f" % wallet.balance())
+    print("\nTotal wallet balance: %s" % wallet.balance(fmt='string'))
     input_key = wallet.keys(name="Input")[0]
     if input_key.balance < total_transaction:
         remaining_balance = total_transaction - input_key.balance
@@ -276,6 +276,8 @@ if __name__ == '__main__':
               (network_obj.print_value(remaining_balance), input_key.address, file_inputcode))
     else:
         print("\nEnough input(s) to spent found, ready to create wallets and transaction")
+        print("\nHave you created test-wallet PDFs to check page formatting with the '--test-pdf' option?"
+              "You can change font and image size with the --template and --style options")
         inp = input("\nType 'y' to continue: ")
         if inp not in ['y', 'Y']:
             print("Exiting...")
