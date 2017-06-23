@@ -44,7 +44,6 @@ pdfkit_options = {
     'margin-bottom': '0.25in',
     'margin-left': '0.25in',
     'encoding': "UTF-8",
-    'image-dpi': 96,  # Has no effect on X11 (Unix systems)
 }
 
 
@@ -276,8 +275,9 @@ if __name__ == '__main__':
               (network_obj.print_value(remaining_balance), input_key.address, file_inputcode))
     else:
         print("\nEnough input(s) to spent found, ready to create wallets and transaction")
-        print("\nHave you created test-wallet PDFs to check page formatting with the '--test-pdf' option?"
-              "You can change font and image size with the --template and --style options")
+        if not args.template and not args.style:
+            print("\nHave you created test-wallet PDFs to check page formatting with the '--test-pdf' option? "
+                  "You can change font and image size with the --template and --style options")
         inp = input("\nType 'y' to continue: ")
         if inp not in ['y', 'Y']:
             print("Exiting...")
