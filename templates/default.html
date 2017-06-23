@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Wallet</title>
+</head>
+<body>
+<h1>{{ currency_name|title }} Paper Wallet - {{ wallet_name }}</h1>
+
+<img src="{{ install_dir }}/images/{{ currency_name }}.jpg" width="{{ 300 * image_size_factor }}" align="right">
+
+<p>
+    Congratulations you have received a paper wallet!
+    This wallet contains a private key which gives access to your {{ currency_name_plural }}.
+</p>
+
+<p>
+    WARNING: Keep the private key secret, only scan it when you want to transfer the funds from this wallet.
+</p>
+
+<h2>Check your Balance</h2>
+
+<p>
+    To check the available balance use the address below.
+    All {{ currency_name_plural }} addresses and transfers are public, so you can <strong>safely share</strong> this address.
+    Scan the QR code with your phone or type it on a website such as
+    https://live.blockcypher.com or https://blockchain.info to check the balance of this wallet.
+</p>
+
+<div>Public {{ currency_name|title }} Address: {{ address }}</div>
+<img src="{{ filename_pre }}address.png" width="{{ 180 * image_size_factor }}px">
+
+<h2>What do I need to do with this paper?</h2>
+
+<p>
+    This paper represents actual value in {{ currency_name_plural }}. You have a couple of options:
+</p>
+
+<ol>
+    <li>Do nothing, keep this paper and store it in a safe place.
+    And wait till {{ currency_name_plural }} are worth millions of Euro's each (or 0 no one knows...)
+    Just be sure to make a copy of this paper and store it in another safe place.</li>
+    <li>Exchange them for valuable and well known Euro's right now. Follow the instructions to create a new wallet
+    on coineva.com and use a site such as https://bitonic.nl to get the value of your bitcoins wired to you
+    on an IBAN bank account.</li>
+    <li>Spend them on pizza (https://thuisbezorgd.nl), vaporizers (https://vaposhop.com/), chocolate and more
+    (https://www.eco-logisch.nl/) or of course the well-known Azarius site (https://azarius.net). Follow the
+    instructions on coineva.com to create a software wallet.</li>
+    <li>Or any combination of the above.</li>
+</ol>
+
+<p>
+    If you move the coins from this paper wallet, make sure to transfer them all at once, because your
+    private key is exposed during the transfer.
+</p>
+
+<h3>Check coineva.com for more paper wallet instructions and Bitcoin and other cryptocurrency information.</h3>
+
+<hr />
+
+<br />
+
+<h2>Private Key</h2>
+
+<p>
+    WARNING: Do not reveal this private key until you are ready to transfer the funds.
+    Anything or anyone who scans this key can steal the coins no this paper wallet!
+</p>
+
+<img src="{{ filename_pre }}privatekey.png" width="{{ 220 * image_size_factor }}px">
+
+<div>Your private key: {{ private_key }}</div>
+
+<br />
+
+<p>
+    <sub>This paper wallet is created with BulkPaperWallets in Python,
+    check https://github.com/1200wd/bulkpaperwallets
+    </sub>
+</p>
+</body>
+</html>

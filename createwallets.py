@@ -2,7 +2,7 @@
 #
 # Bulk Paper Wallets
 # Generate Bitcoin Paper Wallets in Bulk and fund them. Wallets will be saved as PDF files.
-# © 2017 April - 1200 Web Development <http://1200wd.com/>
+# © 2017 June - 1200 Web Development <http://1200wd.com/>
 #
 # Published under GNU GENERAL PUBLIC LICENSE see LICENSE file for more details.
 # WARNING: This software is still under development, only use if you understand the code and known what you are doing.
@@ -60,7 +60,7 @@ class BulkPaperWallet(HDWallet):
             priv_img = qrcode.make(private_wif)
             priv_img.save(filename_pre+'privatekey.png', 'PNG')
 
-            f = open(template_file, 'r')
+            f = open('templates/'+template_file, 'r')
             template = Template(f.read())
             wallet_name = "%s %d" % (self.name, wallet_key.key_id)
             wallet_str = template.render(
@@ -68,7 +68,10 @@ class BulkPaperWallet(HDWallet):
                 filename_pre=filename_pre,
                 wallet_name=wallet_name,
                 private_key=private_wif,
-                address=wallet_key.address)
+                address=wallet_key.address,
+                currency_name=self.network.currency_name,
+                currency_name_plural=self.network.currency_name_plural,
+                image_size_factor=2)
             print("Generate wallet %d" % wallet_key.key_id)
             pdfkit.from_string(wallet_str, filename_pre+'wallet.pdf', options=pdfkit_options, css=style_file)
             count += 1
@@ -109,7 +112,7 @@ def parse_args():
                         help="Generate a single preview PDF paper wallet. Contains dummy keys")
     parser.add_argument('--style', '-s', default='style.css',
                         help="Specify style sheet file")
-    parser.add_argument('--template', '-t', default='wallet_template.html',
+    parser.add_argument('--template', '-t', default='default.html',
                         help="Specify wallet template html file")
 
     pa = parser.parse_args()
@@ -168,7 +171,7 @@ if __name__ == '__main__':
             wallet = BulkPaperWallet('BPW_pdf_test_tmp')
         else:
             wallet_obj = BulkPaperWallet
-            wallet = wallet_obj.create(name='BPW_pdf_test_tmp', network='testnet')
+            wallet = wallet_obj.create(name='BPW_pdf_test_tmp', network=network)
         test_key = wallet.get_key()
         wallet.create_paper_wallets([test_key], style_file, template_file)
 
