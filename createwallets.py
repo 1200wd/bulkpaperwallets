@@ -49,7 +49,7 @@ pdfkit_options = {
 
 class BulkPaperWallet(HDWallet):
 
-    def create_paper_wallets(self, output_keys, style_file, template_file):
+    def create_paper_wallets(self, output_keys, style_file, template_file, image_size_factor=1):
         count = 0
         for wallet_key in output_keys:
             address_img = qrcode.make(wallet_key.address)
@@ -71,7 +71,7 @@ class BulkPaperWallet(HDWallet):
                 address=wallet_key.address,
                 currency_name=self.network.currency_name,
                 currency_name_plural=self.network.currency_name_plural,
-                image_size_factor=2)
+                image_size_factor=image_size_factor)
             print("Generate wallet %d" % wallet_key.key_id)
             pdfkit.from_string(wallet_str, filename_pre+'wallet.pdf', options=pdfkit_options, css=style_file)
             count += 1
@@ -114,6 +114,8 @@ def parse_args():
                         help="Specify style sheet file")
     parser.add_argument('--template', '-t', default='default.html',
                         help="Specify wallet template html file")
+    parser.add_argument('--image-size', type=int, default=1,
+                        help="Image size factor in paper wallets")
 
     pa = parser.parse_args()
     if pa.outputs_repeat and pa.outputs is None:
@@ -173,7 +175,7 @@ if __name__ == '__main__':
             wallet_obj = BulkPaperWallet
             wallet = wallet_obj.create(name='BPW_pdf_test_tmp', network=network)
         test_key = wallet.get_key()
-        wallet.create_paper_wallets([test_key], style_file, template_file)
+        wallet.create_paper_wallets([test_key], style_file, template_file, args.image_size)
 
         delete_wallet('BPW_pdf_test_tmp')
         sys.exit()
