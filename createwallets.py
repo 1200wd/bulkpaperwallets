@@ -117,7 +117,7 @@ def parse_args():
     parser.add_argument('--image-size', type=int, default=1,
                         help="Image size factor in paper wallets")
     parser.add_argument('--fee-per-kb', '-k', type=int,
-                        help="Fee in satoshis per kilobyte")
+                        help="Fee in Satoshi's per kilobyte")
 
     pa = parser.parse_args()
     if pa.outputs_repeat and pa.outputs is None:
