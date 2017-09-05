@@ -116,7 +116,7 @@ def parse_args():
                         help="Specify wallet template html file")
     parser.add_argument('--image-size', type=int, default=1,
                         help="Image size factor in paper wallets")
-    parser.add_argument('--fee-per-kb', 'k', type=int,
+    parser.add_argument('--fee-per-kb', '-k', type=int,
                         help="Fee in satoshis per kilobyte")
 
     pa = parser.parse_args()
