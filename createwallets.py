@@ -116,6 +116,8 @@ def parse_args():
                         help="Specify wallet template html file")
     parser.add_argument('--image-size', type=int, default=1,
                         help="Image size factor in paper wallets")
+    parser.add_argument('--fee-per-kb', 'k', type=int,
+                        help="Fee in satoshis per kilobyte")
 
     pa = parser.parse_args()
     if pa.outputs_repeat and pa.outputs is None:
@@ -251,13 +253,18 @@ if __name__ == '__main__':
 
     # --- Estimate transaction fees ---
     srv = Service(network=network)
-    fee_per_kb = srv.estimatefee()
-    if not srv.results:
-        raise IOError("No response from services, could not determine estimated transaction fees")
+    if args.fee_per_kb:
+        fee_per_kb = args.fee_per_kb
+    else:
+        fee_per_kb = srv.estimatefee()
+        if not srv.results:
+            raise IOError("No response from services, could not determine estimated transaction fees. "
+                          "You can use --fee-per-kb option to determine fee manually and avoid this error.")
     tr_size = 100 + (1 * 150) + (len(outputs_arr) * 50)
     estimated_fee = int((tr_size / 1024) * fee_per_kb)
     if estimated_fee < 0:
-        raise IOError("No valid response from any service provider, could not determine estimated transaction fees")
+        raise IOError("No valid response from any service provider, could not determine estimated transaction fees. "
+                      "You can use --fee-per-kb option to determine fee manually and avoid this error.")
     print("Estimated fee is for this transaction is %s (%d satoshis/kb)" %
           (network_obj.print_value(estimated_fee), fee_per_kb))
     print("Total value of outputs is %s" % network_obj.print_value(total_amount))
