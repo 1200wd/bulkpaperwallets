@@ -272,8 +272,8 @@ if __name__ == '__main__':
 
     # --- Check for UTXO's and create transaction and Paper wallets
     input_key = wallet.keys(name="Input")[0]
-    wallet.updateutxos(0, input_key.id)
-    print("\nTotal wallet balance: %s" % wallet.balance(fmt='string'))
+    wallet.updateutxos(account_id=0, key_id=input_key.id)
+    print("\nTotal wallet balance: %s" % wallet.balance(as_string=True))
     input_key = wallet.keys(name="Input")[0]
     if input_key.balance < total_transaction:
         remaining_balance = total_transaction - input_key.balance
