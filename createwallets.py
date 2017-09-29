@@ -149,7 +149,7 @@ if __name__ == '__main__':
         print("Wallet info for %s" % args.wallet_info)
         if wallet_exists(args.wallet_info):
             wallet = BulkPaperWallet(args.wallet_info)
-            wallet.updateutxos()
+            wallet.utxos_update()
             wallet.info()
         else:
             raise ValueError("Wallet '%s' not found" % args.wallet_info)
@@ -272,7 +272,7 @@ if __name__ == '__main__':
 
     # --- Check for UTXO's and create transaction and Paper wallets
     input_key = wallet.keys(name="Input")[0]
-    wallet.updateutxos(account_id=0, key_id=input_key.id)
+    wallet.utxos_update(account_id=0, key_id=input_key.id)
     print("\nTotal wallet balance: %s" % wallet.balance(as_string=True))
     input_key = wallet.keys(name="Input")[0]
     if input_key.balance < total_transaction:
