@@ -16,7 +16,7 @@ import binascii
 import qrcode
 import pdfkit
 from jinja2 import Template
-from bitcoinlib.wallets import HDWallet, wallet_exists, delete_wallet, list_wallets
+from bitcoinlib.wallets import HDWallet, wallet_exists, wallet_delete, wallets_list
 from bitcoinlib.keys import HDKey
 from bitcoinlib.mnemonic import Mnemonic
 from bitcoinlib.networks import Network
@@ -127,6 +127,7 @@ def parse_args():
         parser.error("Either --outputs or --outputs-import should be specified")
     return pa
 
+
 if __name__ == '__main__':
     # --- Parse commandline arguments ---
     args = parse_args()
@@ -140,7 +141,7 @@ if __name__ == '__main__':
     # List wallets, then exit
     if args.list_wallets:
         print("\nBitcoinlib wallets:")
-        for w in list_wallets():
+        for w in wallets_list():
             print(w['name'])
         print("\n")
         sys.exit()
@@ -163,7 +164,7 @@ if __name__ == '__main__':
         inp = input("\nWallet '%s' with all keys and will be removed, without private key it cannot be restored."
                     "\nPlease retype exact name of wallet to proceed: " % args.wallet_remove)
         if inp == args.wallet_remove:
-            if delete_wallet(args.wallet_remove, force=True):
+            if wallet_delete(args.wallet_remove, force=True):
                 print("\nWallet %s has been removed" % args.wallet_remove)
             else:
                 print("\nError when deleting wallet")
@@ -179,7 +180,7 @@ if __name__ == '__main__':
         test_key = wallet.get_key()
         wallet.create_paper_wallets([test_key], style_file, template_file, args.image_size)
 
-        delete_wallet('BPW_pdf_test_tmp')
+        wallet_delete('BPW_pdf_test_tmp')
         sys.exit()
 
     # --- Create or open wallet ---
