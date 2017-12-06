@@ -242,7 +242,7 @@ if __name__ == '__main__':
             outputs = [{
                 'amount': float(row[0]),
                 'name': row[1]} for row in reader]
-        print("Succesfully imported %d outputs" % len(outputs))
+        print("Successfully imported %d outputs" % len(outputs))
     else:
         output_list = [{'amount': o, 'name': ''} for o in args.outputs]
         repeat_n = 1
@@ -282,10 +282,10 @@ if __name__ == '__main__':
     total_transaction = total_amount + estimated_fee
 
     # --- Check for UTXO's and create transaction and Paper wallets
-    input_key = wallet.keys(name="Input")[0]
+    input_key = wallet.keys(name="Input", is_active=None)[0]
     wallet.utxos_update(account_id=0, key_id=input_key.id)
     print("\nTotal wallet balance: %s" % wallet.balance(as_string=True))
-    input_key = wallet.keys(name="Input")[0]
+    input_key = wallet.keys(name="Input", is_active=None)[0]
     if input_key.balance < total_transaction:
         remaining_balance = total_transaction - input_key.balance
         file_inputcode = os.path.join(WALLET_DIR, str(wallet.wallet_id) + '-input-address-qrcode.png')
@@ -307,7 +307,7 @@ if __name__ == '__main__':
         if inp not in ['y', 'Y']:
             print("Exiting...")
             sys.exit()
-        wallet.create_paper_wallets(output_keys, style_file, template_file)
+        wallet.create_paper_wallets(output_keys, style_file, template_file, args.image_size)
         tx_id = wallet.send(outputs_arr, account_id=0, transaction_fee=estimated_fee, min_confirms=0)
 
         print("\nTransaction pushed to the network, txid: %s" % tx_id)
