@@ -27,6 +27,10 @@ And the libraries to generate a PDF from HTML
 
 ``apt install wkhtmltopdf``
 
+And if you get PIL or Image errors
+
+``No module named 'PIL'``
+
 
 Usage reference
 ---------------
