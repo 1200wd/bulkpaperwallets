@@ -63,7 +63,7 @@ class BulkPaperWallet(HDWallet):
 
             f = open('templates/'+template_file, 'r')
             template = Template(f.read())
-            wallet_name = "%s %d" % (self.name, wallet_key.key_id)
+            wallet_name = "%s %s %d" % (self.name, wallet_key.name, wallet_key.key_id)
             wallet_str = template.render(
                 install_dir=INSTALL_DIR,
                 filename_pre=filename_pre,
@@ -256,7 +256,7 @@ if __name__ == '__main__':
     total_amount = 0
     denominator = float(network_obj.denominator)
     for o in outputs:
-        nk = wallet.new_key(account_id=OUTPUT_ACCOUNT_ID)
+        nk = wallet.new_key(account_id=OUTPUT_ACCOUNT_ID, name=o['name'].lstrip())
         output_keys.append(nk)
         amount = int(o['amount'] * (1/denominator))
         outputs_arr.append((nk.address, amount))
