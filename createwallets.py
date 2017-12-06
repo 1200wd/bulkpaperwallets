@@ -15,6 +15,7 @@ import argparse
 import binascii
 import qrcode
 import pdfkit
+import csv
 from jinja2 import Template
 from bitcoinlib.wallets import HDWallet, wallet_exists, wallet_delete, wallets_list
 from bitcoinlib.keys import HDKey
@@ -78,7 +79,8 @@ class BulkPaperWallet(HDWallet):
         print("A total of %d paper wallets have been created" % count)
 
     @classmethod
-    def create(cls, name, key='', owner='', network=None, account_id=0, purpose=44, databasefile=None):
+    def create(cls, name, key='', owner='', network=None, account_id=0, purpose=44, scheme='bip44', parent_id=None,
+               sort_keys=False, databasefile=None):
         return super(BulkPaperWallet, cls).create(name=name, key=key, network=network, account_id=account_id,
                                                   purpose=purpose, databasefile=databasefile)
 
@@ -231,8 +233,16 @@ if __name__ == '__main__':
     # --- Create array with outputs ---
     outputs = []
     if args.outputs_import:
-        pass
-        # TODO: import amount and wallet names from csv
+        print("Import outputs from .csv file")
+        with open(args.outputs_import, mode='r') as f:
+            reader = csv.reader(f)
+            for row in reader:
+                assert len(row) == 2, "Row length is not 2 or row %s, row should have format: amount, name" % row
+            f.seek(0)
+            outputs = [{
+                'amount': float(row[0]),
+                'name': row[1]} for row in reader]
+        print("Succesfully imported %d outputs" % len(outputs))
     else:
         output_list = [{'amount': o, 'name': ''} for o in args.outputs]
         repeat_n = 1
