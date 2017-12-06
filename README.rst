@@ -29,7 +29,7 @@ And the libraries to generate a PDF from HTML
 
 And if you get PIL or Image errors
 
-``No module named 'PIL'``
+``pip install image``
 
 
 Usage reference
