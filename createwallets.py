@@ -2,7 +2,7 @@
 #
 # Bulk Paper Wallets
 # Generate Bitcoin Paper Wallets in Bulk and fund them. Wallets will be saved as PDF files.
-# © 2017 June - 1200 Web Development <http://1200wd.com/>
+# © 2017 December - 1200 Web Development <http://1200wd.com/>
 #
 # Published under GNU GENERAL PUBLIC LICENSE see LICENSE file for more details.
 # WARNING: This software is still under development, only use if you understand the code and known what you are doing.
@@ -106,8 +106,8 @@ def parse_args():
                         help="Name of wallet to remove, all keys and related information will be deleted")
     parser.add_argument('--list-wallets', '-l', action='store_true',
                         help="List all known wallets in bitcoinlib database")
-    parser.add_argument('--wallet-info', '-i',
-                        help="List all known wallets in bitcoinlib database")
+    parser.add_argument('--wallet-info', '-i', action='store_true',
+                        help="Show wallet information")
     parser.add_argument('--recover-wallet-passphrase',
                         help="Passphrase of 12 words to recover and regenerate a previous wallet")
     parser.add_argument('--test-pdf', action='store_true',
@@ -149,13 +149,13 @@ if __name__ == '__main__':
         sys.exit()
 
     if args.wallet_info:
-        print("Wallet info for %s" % args.wallet_info)
-        if wallet_exists(args.wallet_info):
-            wallet = BulkPaperWallet(args.wallet_info)
-            wallet.utxos_update()
+        print("Wallet info for %s" % args.wallet_name)
+        if wallet_exists(args.wallet_name):
+            wallet = BulkPaperWallet(args.wallet_name)
+            # wallet.utxos_update()
             wallet.info()
         else:
-            raise ValueError("Wallet '%s' not found" % args.wallet_info)
+            raise ValueError("Wallet '%s' not found" % args.wallet_name)
         sys.exit()
 
     # Delete specified wallet, then exit
@@ -283,7 +283,7 @@ if __name__ == '__main__':
 
     # --- Check for UTXO's and create transaction and Paper wallets
     input_key = wallet.keys(name="Input", is_active=None)[0]
-    wallet.utxos_update(account_id=0, key_id=input_key.id)
+    wallet.utxos_update(account_id=0)
     print("\nTotal wallet balance: %s" % wallet.balance(as_string=True))
     input_key = wallet.keys(name="Input", is_active=None)[0]
     if input_key.balance < total_transaction:
