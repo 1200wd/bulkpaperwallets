@@ -226,7 +226,7 @@ if __name__ == '__main__':
             for kn in range(0, 10):
                 wallet.new_key(account_id=OUTPUT_ACCOUNT_ID)
                 wallet.new_key_change(account_id=OUTPUT_ACCOUNT_ID)
-            stuff_updated = wallet.updateutxos()
+            stuff_updated = wallet.utxos_update()
         wallet.info()
         sys.exit()
 
