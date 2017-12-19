@@ -104,6 +104,8 @@ def parse_args():
                              "will create 10 wallets with 5 bitcoin")
     parser.add_argument('--wallet-remove',
                         help="Name of wallet to remove, all keys and related information will be deleted")
+    parser.add_argument('--print', '-p', action='store_true',
+                        help="Print wallets, skip check for funds on input address")
     parser.add_argument('--list-wallets', '-l', action='store_true',
                         help="List all known wallets in bitcoinlib database")
     parser.add_argument('--wallet-info', '-i', action='store_true',
@@ -286,7 +288,7 @@ if __name__ == '__main__':
     wallet.utxos_update(account_id=0)
     print("\nTotal wallet balance: %s" % wallet.balance(as_string=True))
     input_key = wallet.keys(name="Input", is_active=None)[0]
-    if input_key.balance < total_transaction:
+    if input_key.balance < total_transaction and not args.print:
         remaining_balance = total_transaction - input_key.balance
         file_inputcode = os.path.join(WALLET_DIR, str(wallet.wallet_id) + '-input-address-qrcode.png')
         networklink = network
@@ -299,7 +301,8 @@ if __name__ == '__main__':
               "address %s and restart this program with EXACTLY the same options.\nYou can find a QR code in %s" %
               (network_obj.print_value(remaining_balance), input_key.address, file_inputcode))
     else:
-        print("\nEnough input(s) to spent found, ready to create wallets and transaction")
+        if not args.print:
+            print("\nEnough input(s) to spent found, ready to create wallets and transaction")
         if not args.template and not args.style:
             print("\nHave you created test-wallet PDFs to check page formatting with the '--test-pdf' option? "
                   "You can change font and image size with the --template and --style options")
@@ -308,7 +311,9 @@ if __name__ == '__main__':
             print("Exiting...")
             sys.exit()
         wallet.create_paper_wallets(output_keys, style_file, template_file, args.image_size)
-        tx_id = wallet.send(outputs_arr, account_id=0, transaction_fee=estimated_fee, min_confirms=0)
 
-        print("\nTransaction pushed to the network, txid: %s" % tx_id)
-        print("\nPaper wallets can be found in the %s directory" % WALLET_DIR)
+        if not args.print:
+            tx_id = wallet.send(outputs_arr, account_id=0, transaction_fee=estimated_fee, min_confirms=0)
+            print("\nTransaction pushed to the network, txid: %s" % tx_id)
+
+        print("\nPaper wallets are created and can be found in the %s directory" % WALLET_DIR)
