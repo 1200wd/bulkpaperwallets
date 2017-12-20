@@ -106,12 +106,14 @@ def parse_args():
                         help="Name of wallet to remove, all keys and related information will be deleted")
     parser.add_argument('--print', '-p', action='store_true',
                         help="Print wallets, skip check for funds on input address")
+    parser.add_argument('--passphrase-strength', type=int, default=128,
+                        help="Number of bits for passphrase key")
     parser.add_argument('--list-wallets', '-l', action='store_true',
                         help="List all known wallets in bitcoinlib database")
     parser.add_argument('--wallet-info', '-i', action='store_true',
                         help="Show wallet information")
     parser.add_argument('--recover-wallet-passphrase',
-                        help="Passphrase of 12 words to recover and regenerate a previous wallet")
+                        help="Passphrase - sequence of words - to recover and regenerate a previous wallet")
     parser.add_argument('--test-pdf', action='store_true',
                         help="Generate a single preview PDF paper wallet. Contains dummy keys")
     parser.add_argument('--style', '-s', default='style.css',
@@ -203,7 +205,7 @@ if __name__ == '__main__':
     else:
         print("\nCREATE wallet '%s' (%s network)" % (wallet_name, network))
         if not args.recover_wallet_passphrase:
-            words = Mnemonic('english').generate()
+            words = Mnemonic('english').generate(args.passphrase_strenght)
             print("\nYour mnemonic private key sentence is: %s" % words)
             print("\nPlease write down on paper and backup. With this key you can restore all paper wallets if "
                   "something goes wrong during this process. You can / have to throw away this private key after "
