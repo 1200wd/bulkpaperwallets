@@ -61,7 +61,7 @@ class BulkPaperWallet(HDWallet):
             priv_img = qrcode.make(private_wif)
             priv_img.save(filename_pre+'privatekey.png', 'PNG')
 
-            passphrase = Mnemonic().to_mnemonic(wallet_key.private_byte)
+            passphrase = Mnemonic().to_mnemonic(wallet_key._hdkey_object.private_byte)
 
             f = open('templates/'+template_file, 'r')
             template = Template(f.read())
@@ -293,7 +293,8 @@ if __name__ == '__main__':
     wallet.utxos_update(account_id=0)
     print("\nTotal wallet balance: %s" % wallet.balance(as_string=True))
     input_key = wallet.keys(name="Input", is_active=None)[0]
-    if input_key.balance < total_transaction and not args.print:
+    enough_balance = bool(input_key.balance < total_transaction)
+    if not enough_balance and not args.print:
         remaining_balance = total_transaction - input_key.balance
         file_inputcode = os.path.join(WALLET_DIR, str(wallet.wallet_id) + '-input-address-qrcode.png')
         networklink = network
@@ -306,8 +307,10 @@ if __name__ == '__main__':
               "address %s and restart this program with EXACTLY the same options.\nYou can find a QR code in %s" %
               (network_obj.print_value(remaining_balance), input_key.address, file_inputcode))
     else:
-        if not args.print:
+        if enough_balance:
             print("\nEnough input(s) to spent found, ready to create wallets and transaction")
+        else:
+            print("\nNot enough balance found. Create wallets anyway because --print option was specified.")
         if not args.template and not args.style:
             print("\nHave you created test-wallet PDFs to check page formatting with the '--test-pdf' option? "
                   "You can change font and image size with the --template and --style options")
