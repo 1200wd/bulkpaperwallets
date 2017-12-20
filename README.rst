@@ -40,39 +40,59 @@ Use from commandline with python
 .. code-block:: bash
 
     usage: createwallets.py [-h] [--wallet-name WALLET_NAME] [--network NETWORK]
-                        [--outputs [OUTPUTS [OUTPUTS ...]] | --outputs-import
-                        OUTPUTS_IMPORT] [--outputs-repeat OUTPUTS_REPEAT]
-                        [--wallet-remove WALLET_REMOVE] [--list-wallets]
-                        [--recover-wallet-passphrase RECOVER_WALLET_PASSPHRASE]
+                            [--outputs [OUTPUTS [OUTPUTS ...]] | --outputs-import
+                            OUTPUTS_IMPORT] [--outputs-repeat OUTPUTS_REPEAT]
+                            [--wallet-remove WALLET_REMOVE] [--print]
+                            [--passphrase-strength PASSPHRASE_STRENGTH]
+                            [--list-wallets] [--wallet-info]
+                            [--recover-wallet-passphrase RECOVER_WALLET_PASSPHRASE]
+                            [--test-pdf] [--style STYLE] [--template TEMPLATE]
+                            [--image-size IMAGE_SIZE] [--fee-per-kb FEE_PER_KB]
+
+    Create Bulk Paper Wallets
 
     optional arguments:
+      -h, --help            show this help message and exit
+      --wallet-name WALLET_NAME, -w WALLET_NAME
+                            Name of wallet to create or open. Used to store your
+                            all your wallet keys and will be printed on each paper
+                            wallet
+      --network NETWORK, -n NETWORK
+                            Specify 'bitcoin', 'testnet' or other supported
+                            network
+      --outputs [OUTPUTS [OUTPUTS ...]], -o [OUTPUTS [OUTPUTS ...]]
+                            List of output values. For example '-o 1 2 3' creates
+                            3 wallets with a value of 1, 2 and 3 bitcoin
+                            successively
+      --outputs-import OUTPUTS_IMPORT, -f OUTPUTS_IMPORT
+                            Filename of comma seperated value list of output
+                            values and optional wallet names. Example: 1.51, John
+      --outputs-repeat OUTPUTS_REPEAT, -r OUTPUTS_REPEAT
+                            Repeat the outputs OUTPUTS_REPEAT times. For example
+                            'createwallet.py -o 5 -r 10' will create 10 wallets
+                            with 5 bitcoin
+      --wallet-remove WALLET_REMOVE
+                            Name of wallet to remove, all keys and related
+                            information will be deleted
+      --print, -p           Print wallets, skip check for funds on input address
+      --passphrase-strength PASSPHRASE_STRENGTH
+                            Number of bits for passphrase key
+      --list-wallets, -l    List all known wallets in bitcoinlib database
+      --wallet-info, -i     Show wallet information
+      --recover-wallet-passphrase RECOVER_WALLET_PASSPHRASE
+                            Passphrase - sequence of words - to recover and
+                            regenerate a previous wallet
+      --test-pdf            Generate a single preview PDF paper wallet. Contains
+                            dummy keys
+      --style STYLE, -s STYLE
+                            Specify style sheet file
+      --template TEMPLATE, -t TEMPLATE
+                            Specify wallet template html file
+      --image-size IMAGE_SIZE
+                            Image size factor in paper wallets
+      --fee-per-kb FEE_PER_KB, -k FEE_PER_KB
+                            Fee in Satoshi's per kilobyte
 
-          -h, --help            show this help message and exit
-          --wallet-name WALLET_NAME, -w WALLET_NAME
-                                Name of wallet to create or open. Used to store your
-                                all your wallet keys and will be printed on each paper
-                                wallet
-          --network NETWORK, -n NETWORK
-                                Specify 'bitcoin', 'testnet' or other supported
-                                network
-          --outputs [OUTPUTS [OUTPUTS ...]], -o [OUTPUTS [OUTPUTS ...]]
-                                List of output values. For example '-o 1 2 3' creates
-                                3 wallets with a value of 1, 2 and 3 bitcoin
-                                successively
-          --outputs-import OUTPUTS_IMPORT, -f OUTPUTS_IMPORT
-                                Filename of comma seperated value list of output
-                                values and optional wallet names. Example: 1.51, John
-          --outputs-repeat OUTPUTS_REPEAT, -r OUTPUTS_REPEAT
-                                Repeat the outputs OUTPUTS_REPEAT times. For example
-                                'createwallet.py -o 5 -r 10' will create 10 wallets
-                                with 5 bitcoin
-          --wallet-remove WALLET_REMOVE
-                                Name of wallet to remove, all keys and related
-                                information will be deleted
-          --list-wallets, -l    List all known wallets in bitcoinlib database
-          --recover-wallet-passphrase RECOVER_WALLET_PASSPHRASE
-                                Passphrase of 12 words to recover and regenerate a
-                                previous wallet
 
 
 Example: Create paper wallets
