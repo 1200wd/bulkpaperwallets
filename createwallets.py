@@ -61,6 +61,8 @@ class BulkPaperWallet(HDWallet):
             priv_img = qrcode.make(private_wif)
             priv_img.save(filename_pre+'privatekey.png', 'PNG')
 
+            passphrase = Mnemonic().to_mnemonic(wallet_key.private_byte)
+
             f = open('templates/'+template_file, 'r')
             template = Template(f.read())
             wallet_name = "%s %s %d" % (self.name, wallet_key.name, wallet_key.key_id)
@@ -69,6 +71,7 @@ class BulkPaperWallet(HDWallet):
                 filename_pre=filename_pre,
                 wallet_name=wallet_name,
                 private_key=private_wif,
+                passphrase=passphrase,
                 address=wallet_key.address,
                 currency_name=self.network.currency_name,
                 currency_name_plural=self.network.currency_name_plural,
@@ -205,7 +208,7 @@ if __name__ == '__main__':
     else:
         print("\nCREATE wallet '%s' (%s network)" % (wallet_name, network))
         if not args.recover_wallet_passphrase:
-            words = Mnemonic('english').generate(args.passphrase_strenght)
+            words = Mnemonic('english').generate(args.passphrase_strength)
             print("\nYour mnemonic private key sentence is: %s" % words)
             print("\nPlease write down on paper and backup. With this key you can restore all paper wallets if "
                   "something goes wrong during this process. You can / have to throw away this private key after "
