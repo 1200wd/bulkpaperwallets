@@ -93,7 +93,7 @@ def parse_args():
     parser.add_argument('--wallet-name', '-w', default=DEFAULT_WALLET_NAME,
                         help="Name of wallet to create or open. Used to store your all your wallet keys "
                              "and will be printed on each paper wallet")
-    parser.add_argument('--network', '-n', help="Specify 'bitcoin', 'testnet' or other supported network",
+    parser.add_argument('--network', '-n', help="Specify 'bitcoin', 'litecoin', 'testnet' or other supported network",
                         default=DEFAULT_NETWORK)
     group1 = parser.add_mutually_exclusive_group()
     group1.add_argument('--outputs', '-o', nargs="*", type=float,
