@@ -1,9 +1,9 @@
 Bulk Paper Wallets
 ==================
 
-Create Bulk Bitcoin Paper Wallets
+Create Bulk Bitcoin or Litecoin Paper Wallets
 
-* Generate infinite paper wallets
+* Generate large number of paper wallets
 * Possible to use different amounts for each wallet (via commandline or CSV import)
 * Possible to use an offline computer
 * Derives all private keys for wallet from one masterkey. So you will be able to restore a wallet if someone
@@ -14,7 +14,7 @@ Create Bulk Bitcoin Paper Wallets
 Installation
 ------------
 
-Uses the bitcoinlib Bitcoin Library
+Uses the BitcoinLib Python Bitcoin Library
 
 ``pip install bitcoinlib``
 
@@ -58,7 +58,7 @@ Use from commandline with python
                             all your wallet keys and will be printed on each paper
                             wallet
       --network NETWORK, -n NETWORK
-                            Specify 'bitcoin', 'testnet' or other supported
+                            Specify 'bitcoin', 'litecoin', 'testnet' or other supported
                             network
       --outputs [OUTPUTS [OUTPUTS ...]], -o [OUTPUTS [OUTPUTS ...]]
                             List of output values. For example '-o 1 2 3' creates
@@ -70,14 +70,14 @@ Use from commandline with python
       --outputs-repeat OUTPUTS_REPEAT, -r OUTPUTS_REPEAT
                             Repeat the outputs OUTPUTS_REPEAT times. For example
                             'createwallet.py -o 5 -r 10' will create 10 wallets
-                            with 5 bitcoin
+                            with 5 bitcoins
       --wallet-remove WALLET_REMOVE
                             Name of wallet to remove, all keys and related
                             information will be deleted
       --print, -p           Print wallets, skip check for funds on input address
       --passphrase-strength PASSPHRASE_STRENGTH
                             Number of bits for passphrase key
-      --list-wallets, -l    List all known wallets in bitcoinlib database
+      --list-wallets, -l    List all known wallets in BitcoinLib database
       --wallet-info, -i     Show wallet information
       --recover-wallet-passphrase RECOVER_WALLET_PASSPHRASE
                             Passphrase - sequence of words - to recover and
@@ -157,4 +157,11 @@ Restart the program with the same options:
 
 Paper wallets are now funded and ready to use. Print and store in a safe location.
 
+
+Disclaimer
+----------
+
+The BitcoinLib Python Bitcoin Library and this repository are still in development state.
+
+Please use at your own risk, known what you are doing and test first with small amounts and a test network.
 

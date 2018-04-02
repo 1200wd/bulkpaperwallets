@@ -83,7 +83,7 @@ class BulkPaperWallet(HDWallet):
 
     @classmethod
     def create(cls, name, key='', owner='', network=None, account_id=0, purpose=44, scheme='bip44', parent_id=None,
-               sort_keys=False, databasefile=None):
+               sort_keys=False, password='', databasefile=None):
         return super(BulkPaperWallet, cls).create(name=name, key=key, network=network, account_id=account_id,
                                                   purpose=purpose, databasefile=databasefile)
 
@@ -93,7 +93,7 @@ def parse_args():
     parser.add_argument('--wallet-name', '-w', default=DEFAULT_WALLET_NAME,
                         help="Name of wallet to create or open. Used to store your all your wallet keys "
                              "and will be printed on each paper wallet")
-    parser.add_argument('--network', '-n', help="Specify 'bitcoin', 'testnet' or other supported network",
+    parser.add_argument('--network', '-n', help="Specify 'bitcoin', 'litecoin', 'testnet' or other supported network",
                         default=DEFAULT_NETWORK)
     group1 = parser.add_mutually_exclusive_group()
     group1.add_argument('--outputs', '-o', nargs="*", type=float,
