@@ -83,7 +83,7 @@ class BulkPaperWallet(HDWallet):
 
     @classmethod
     def create(cls, name, key='', owner='', network=None, account_id=0, purpose=44, scheme='bip44', parent_id=None,
-               sort_keys=False, databasefile=None):
+               sort_keys=False, password='', databasefile=None):
         return super(BulkPaperWallet, cls).create(name=name, key=key, network=network, account_id=account_id,
                                                   purpose=purpose, databasefile=databasefile)
 
