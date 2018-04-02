@@ -293,7 +293,7 @@ if __name__ == '__main__':
     wallet.utxos_update(account_id=0)
     print("\nTotal wallet balance: %s" % wallet.balance(as_string=True))
     input_key = wallet.keys(name="Input", is_active=None)[0]
-    enough_balance = bool(input_key.balance < total_transaction)
+    enough_balance = bool(input_key.balance >= total_transaction)
     if not enough_balance and not args.print:
         remaining_balance = total_transaction - input_key.balance
         file_inputcode = os.path.join(WALLET_DIR, str(wallet.wallet_id) + '-input-address-qrcode.png')
