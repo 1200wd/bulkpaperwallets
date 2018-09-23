@@ -199,10 +199,10 @@ if __name__ == '__main__':
                   wallet_name)
             sys.exit()
         wallet = BulkPaperWallet(wallet_name)
-        if wallet.network.network_name != args.network:
+        if wallet.network.name != args.network:
             print("\nNetwork setting (%s) ignored. Using network from defined wallet instead: %s" %
-                  (args.network, wallet.network.network_name))
-            network = wallet.network.network_name
+                  (args.network, wallet.network.name))
+            network = wallet.network.name
             network_obj = Network(network)
         print("\nOpen wallet '%s' (%s network)" % (wallet_name, network))
     else:
@@ -289,10 +289,13 @@ if __name__ == '__main__':
     total_transaction = total_amount + estimated_fee
 
     # --- Check for UTXO's and create transaction and Paper wallets
-    input_key = wallet.keys(name="Input", is_active=None)[0]
+    input_key = wallet.keys(name="Input", is_active=None)
+    if not input_key:
+        print("No valid input key found. Is this wallet created with BulkPaperWallets?")
+        sys.exit()
+    input_key = input_key[0]
     wallet.utxos_update(account_id=0)
     print("\nTotal wallet balance: %s" % wallet.balance(as_string=True))
-    input_key = wallet.keys(name="Input", is_active=None)[0]
     enough_balance = bool(input_key.balance >= total_transaction)
     if not enough_balance and not args.print:
         remaining_balance = total_transaction - input_key.balance
@@ -321,7 +324,7 @@ if __name__ == '__main__':
         wallet.create_paper_wallets(output_keys, style_file, template_file, args.image_size)
 
         if not args.print:
-            tx_id = wallet.send(outputs_arr, account_id=0, transaction_fee=estimated_fee, min_confirms=0)
+            tx_id = wallet.send(outputs_arr, account_id=0, fee=estimated_fee, min_confirms=0)
             print("\nTransaction pushed to the network, txid: %s" % tx_id)
 
         print("\nPaper wallets are created and can be found in the %s directory" % WALLET_DIR)
