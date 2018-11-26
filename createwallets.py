@@ -1,8 +1,9 @@
 # -*- coding: iso-8859-15 -*-
 #
 # Bulk Paper Wallets
+#
 # Generate Bitcoin Paper Wallets in Bulk and fund them. Wallets will be saved as PDF files.
-# © 2017 December - 1200 Web Development <http://1200wd.com/>
+# © 2017 - 2018 December - 1200 Web Development <http://1200wd.com/>
 #
 # Published under GNU GENERAL PUBLIC LICENSE see LICENSE file for more details.
 # WARNING: This software is still under development, only use if you understand the code and known what you are doing.
@@ -82,10 +83,14 @@ class BulkPaperWallet(HDWallet):
         print("A total of %d paper wallets have been created" % count)
 
     @classmethod
-    def create(cls, name, key='', owner='', network=None, account_id=0, purpose=44, scheme='bip44', parent_id=None,
-               sort_keys=False, password='', databasefile=None):
-        return super(BulkPaperWallet, cls).create(name=name, key=key, network=network, account_id=account_id,
-                                                  purpose=purpose, databasefile=databasefile)
+    def create(cls, name, keys='', owner='', network=None, account_id=0, purpose=0, scheme='bip32', parent_id=None,
+               sort_keys=True, password='', witness_type='legacy', encoding=None, multisig=None,
+               cosigner_id=None, key_path=None, databasefile=None):
+        return super(BulkPaperWallet, cls).create(
+            name=name, keys=keys, network=network, account_id=account_id,
+            purpose=purpose, scheme=scheme, parent_id=parent_id, sort_keys=sort_keys, password=password,
+            witness_type=witness_type, encoding=encoding, multisig=multisig, cosigner_id=cosigner_id, key_path=key_path,
+            databasefile=databasefile)
 
 
 def parse_args():
@@ -125,6 +130,8 @@ def parse_args():
                         help="Specify wallet template html file")
     parser.add_argument('--image-size', type=int, default=1,
                         help="Image size factor in paper wallets")
+    parser.add_argument('--witness-type', '-y', default='legacy',
+                        help='Wallet witness type, can be legacy, p2sh-segwit or segwit. Default is legacy. ')
     parser.add_argument('--fee-per-kb', '-k', type=int,
                         help="Fee in Satoshi's per kilobyte")
 
@@ -222,7 +229,7 @@ if __name__ == '__main__':
 
         seed = binascii.hexlify(Mnemonic().to_seed(words))
         hdkey = HDKey().from_seed(seed, network=network)
-        wallet = BulkPaperWallet.create(name=wallet_name, network=network, key=hdkey.wif())
+        wallet = BulkPaperWallet.create(name=wallet_name, network=network, keys=hdkey, witness_type=args.witness_type)
         wallet.new_key("Input")
         wallet.new_account("Outputs", account_id=OUTPUT_ACCOUNT_ID)
 
@@ -325,6 +332,6 @@ if __name__ == '__main__':
 
         if not args.print:
             tx_id = wallet.send(outputs_arr, account_id=0, fee=estimated_fee, min_confirms=0)
-            print("\nTransaction pushed to the network, txid: %s" % tx_id)
+            print("\nTransaction pushed to the network, transaction ID: %s" % tx_id)
 
         print("\nPaper wallets are created and can be found in the %s directory" % WALLET_DIR)
