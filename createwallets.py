@@ -66,7 +66,7 @@ class BulkPaperWallet(HDWallet):
 
             f = open('templates/'+template_file, 'r')
             template = Template(f.read())
-            wallet_name = "%s %s %d" % (self.name, wallet_key.name, wallet_key.key_id)
+            wallet_name = self.name
             wallet_str = template.render(
                 install_dir=INSTALL_DIR,
                 filename_pre=filename_pre,
@@ -331,7 +331,8 @@ if __name__ == '__main__':
         wallet.create_paper_wallets(output_keys, style_file, template_file, args.image_size)
 
         if not args.print:
-            tx_id = wallet.send(outputs_arr, account_id=0, fee=estimated_fee, min_confirms=0)
-            print("\nTransaction pushed to the network, transaction ID: %s" % tx_id)
+            t = wallet.send(outputs_arr, account_id=0, fee=estimated_fee, min_confirms=0)
+            print("\nTransaction pushed to the network, transaction information / result:")
+            t.info()
 
         print("\nPaper wallets are created and can be found in the %s directory" % WALLET_DIR)
